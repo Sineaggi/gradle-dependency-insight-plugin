@@ -19,9 +19,9 @@ repositories {
 testing {
     suites {
         // Configure the built-in test suite
-        val test by getting(JvmTestSuite::class) {
+        val test by existing(JvmTestSuite::class) {
             // Use JUnit Jupiter test framework
-            useJUnitJupiter("5.12.1")
+            useJUnitJupiter("6.0.0")
         }
 
         // Create a new test suite
@@ -32,7 +32,7 @@ testing {
             }
 
             targets {
-                all {
+                configureEach {
                     // This test suite should run after the built-in test suite has run its tests
                     testTask.configure { shouldRunAfter(test) } 
                 }

@@ -6,3 +6,9 @@ build
 
 .idea
 
+user/gradlew
+user/gradlew.bat
+user/gradle/wrapper
+user/.idea
+user/.gradle
+user/build

@@ -13,3 +13,5 @@ pluginManagement {
 rootProject.name = "user"
 include("app")
 include("lib")
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
