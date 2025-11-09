@@ -1,16 +1,24 @@
 package org.example;
 
 import org.gradle.api.DefaultTask;
+import org.gradle.api.GradleException;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier;
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
+import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.jspecify.annotations.NonNull;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,21 +39,35 @@ public class ListDependencySizeTask extends DefaultTask {
     }
 
     private final SetProperty<Holder> holders = getProject().getObjects().setProperty(Holder.class);
-    private final SetProperty<Dependency> dependencies = getProject().getObjects().setProperty(Dependency.class);
+    private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
 
     @Input
     public SetProperty<Holder> getHolders() {
         return holders;
     }
 
+    @OutputFile
+    public RegularFileProperty getOutputFile() {
+        return outputFile;
+    }
+
     public ListDependencySizeTask() {
         this.holders.addAll(ccCompatibleAction());
+        this.outputFile.convention(getProject().getLayout().getBuildDirectory().file("reports/dependency-size/data.bin"));
     }
 
     @TaskAction
     public void run() {
         System.out.println(holders.get());
-        System.out.println(holders.get().stream().mapToLong(it -> it.size).sum() / 1000.0f / 1000.0f + "MiB");
+        System.out.println(holders.get().stream().mapToLong(Holder::size).sum() / 1000.0f / 1000.0f + "MiB");
+        ArrayList<Holder> data = new ArrayList<>(holders.get());
+        data.sort(Comparator.comparing(Holder::path));
+        try (OutputStream os = Files.newOutputStream(outputFile.get().getAsFile().toPath());
+        ObjectOutputStream oos = new ObjectOutputStream(os)) {
+            oos.writeObject(data);
+        } catch (IOException e) {
+            throw new GradleException("failed to write", e);
+        }
     }
 
     private SetProperty<@NonNull Holder> ccCompatibleAction() {

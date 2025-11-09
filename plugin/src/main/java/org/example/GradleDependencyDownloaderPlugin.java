@@ -6,11 +6,14 @@ package org.example;
 import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Project;
 import org.gradle.api.Plugin;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.DependencyScopeConfiguration;
 import org.gradle.api.artifacts.ResolvableConfiguration;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.jvm.internal.JvmPluginServices;
+import org.gradle.api.tasks.TaskProvider;
+import org.jspecify.annotations.NonNull;
 
 import javax.inject.Inject;
 
@@ -26,8 +29,13 @@ public abstract class GradleDependencyDownloaderPlugin implements Plugin<Project
     protected abstract JvmPluginServices getEcosystemUtilities();
 
     public void apply(Project project) {
-        project.getTasks().register("hek", ListDependencySizeTask.class, task -> {
+        Configuration dependencyDownloader = project.getConfigurations().create("dependencyDownloader");
+        TaskProvider<@NonNull ListDependencySizeTask> dependencySize = project.getTasks().register("hek", ListDependencySizeTask.class, task -> {
 
+        });
+        // project.getArtifacts().add("dependency-downloader", project.getLayout().getBuildDirectory().file("dependency-downloader"), hek);
+        project.artifacts(artifactHandler -> {
+            artifactHandler.add(dependencyDownloader.getName(), dependencySize);
         });
 
         // todo: report aggregation
