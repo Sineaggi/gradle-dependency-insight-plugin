@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * A simple functional test for the 'org.example.greeting' plugin.
  */
-class GradleDependencyDownloaderPluginFunctionalTest {
+class DependencySizeReportPluginFunctionalTest {
     //@TempDir
     //File projectDir;
 

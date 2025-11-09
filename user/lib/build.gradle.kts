@@ -1,4 +1,4 @@
 plugins {
     id("java")
-    id("dependency-size-insight")
+    id("dependency-size-report")
 }
