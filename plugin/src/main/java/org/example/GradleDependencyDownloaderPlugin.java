@@ -26,31 +26,27 @@ public abstract class GradleDependencyDownloaderPlugin implements Plugin<Project
     protected abstract JvmPluginServices getEcosystemUtilities();
 
     public void apply(Project project) {
-        // Register a task
-        project.getTasks().register("greeting", task -> {
-            task.doLast(s -> System.out.println("Hello from plugin 'org.example.greeting'"));
-        });
-        var clock = project.getGradle().getSharedServices().registerIfAbsent("dependencies", Clock.class);
         project.getTasks().register("hek", ListDependencySizeTask.class, task -> {
 
         });
 
-        project.getPluginManager().apply("org.gradle.reporting-base");
-        project.getPluginManager().apply("jvm-ecosystem");
-        project.getPluginManager().apply("jacoco");
-
-        ConfigurationContainer configurations = project.getConfigurations();
-        NamedDomainObjectProvider<DependencyScopeConfiguration> jacocoAggregation = configurations.dependencyScope(DEPENDENCY_SIZE_AGGREGATION_CONFIGURATION_NAME, conf -> {
-            conf.setDescription("Collects project dependencies for purposes of JaCoCo coverage report aggregation");
-        });
-
-        NamedDomainObjectProvider<ResolvableConfiguration> codeCoverageResultsConf = configurations.resolvable("aggregateCodeCoverageReportResults", conf -> {
-            conf.setDescription("Resolvable configuration used to gather files for the JaCoCo coverage report aggregation via ArtifactViews, not intended to be used directly");
-            conf.extendsFrom(jacocoAggregation.get());
-            project.getPlugins().withType(JavaBasePlugin.class, plugin -> {
-                // If the current project is jvm-based, aggregate dependent projects as jvm-based as well.
-                getEcosystemUtilities().configureAsRuntimeClasspath(conf);
-            });
-        });
+        // todo: report aggregation
+        // project.getPluginManager().apply("org.gradle.reporting-base");
+        // project.getPluginManager().apply("jvm-ecosystem");
+        // project.getPluginManager().apply("jacoco");
+//
+        // ConfigurationContainer configurations = project.getConfigurations();
+        // NamedDomainObjectProvider<DependencyScopeConfiguration> jacocoAggregation = configurations.dependencyScope(DEPENDENCY_SIZE_AGGREGATION_CONFIGURATION_NAME, conf -> {
+        //     conf.setDescription("Collects project dependencies for purposes of JaCoCo coverage report aggregation");
+        // });
+//
+        // NamedDomainObjectProvider<ResolvableConfiguration> codeCoverageResultsConf = configurations.resolvable("aggregateCodeCoverageReportResults", conf -> {
+        //     conf.setDescription("Resolvable configuration used to gather files for the JaCoCo coverage report aggregation via ArtifactViews, not intended to be used directly");
+        //     conf.extendsFrom(jacocoAggregation.get());
+        //     project.getPlugins().withType(JavaBasePlugin.class, plugin -> {
+        //         // If the current project is jvm-based, aggregate dependent projects as jvm-based as well.
+        //         getEcosystemUtilities().configureAsRuntimeClasspath(conf);
+        //     });
+        // });
     }
 }

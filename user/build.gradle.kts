@@ -1,6 +1,6 @@
 plugins {
     id("java")
-    id("org.example.greeting")
+    id("dependency-size-insight")
 }
 
 dependencies {

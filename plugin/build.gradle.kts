@@ -44,7 +44,7 @@ testing {
 gradlePlugin {
     // Define the plugin
     val greeting by plugins.creating {
-        id = "org.example.greeting"
+        id = "dependency-size-insight"
         implementationClass = "org.example.GradleDependencyDownloaderPlugin"
     }
 }
