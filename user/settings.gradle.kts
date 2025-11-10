@@ -10,7 +10,7 @@ pluginManagement {
     includeBuild("..")
 }
 
-rootProject.name = "user"
+rootProject.name = "gradle-dependency-size-user"
 include("app")
 include("lib")
 
