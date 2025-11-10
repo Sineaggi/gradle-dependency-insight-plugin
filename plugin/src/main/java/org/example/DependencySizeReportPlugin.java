@@ -3,55 +3,25 @@
  */
 package org.example;
 
-import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Project;
 import org.gradle.api.Plugin;
-import org.gradle.api.artifacts.ConfigurationContainer;
-import org.gradle.api.artifacts.DependencyScopeConfiguration;
-import org.gradle.api.artifacts.ResolvableConfiguration;
-import org.gradle.api.plugins.JavaBasePlugin;
-import org.gradle.api.plugins.jvm.internal.JvmPluginServices;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.tasks.TaskProvider;
 import org.jspecify.annotations.NonNull;
-
-import javax.inject.Inject;
 
 /**
  * A simple 'hello world' plugin.
  */
 public abstract class DependencySizeReportPlugin implements Plugin<Project> {
-    public static final String DEPENDENCY_SIZE_AGGREGATION_CONFIGURATION_NAME = "dependencySizeAggregation";
 
-    @Inject
-    protected abstract JvmPluginServices getEcosystemUtilities();
+    public static final String DEPENDENCY_SIZE_CONFIGURATION_NAME = "dependencySize";
 
     public void apply(Project project) {
-        // todo: report aggregation
-        project.getPluginManager().apply("org.gradle.reporting-base");
-        project.getPluginManager().apply("jvm-ecosystem");
-        // project.getPluginManager().apply("jacoco");
-
-        ConfigurationContainer configurations = project.getConfigurations();
-        NamedDomainObjectProvider<DependencyScopeConfiguration> dependencySizeAggregation = configurations.dependencyScope(DEPENDENCY_SIZE_AGGREGATION_CONFIGURATION_NAME, conf -> {
-            conf.setDescription("Collects project dependencies for purposes of dependency size report aggregation");
+        Configuration dependencySizeConfiguration = project.getConfigurations().create(DEPENDENCY_SIZE_CONFIGURATION_NAME);
+        TaskProvider<@NonNull DependencySizeTask> dependencySizeTask = project.getTasks().register("dependencySize", DependencySizeTask.class, task -> {
         });
-
-        NamedDomainObjectProvider<ResolvableConfiguration> dependencySizeResultsConf = configurations.resolvable("aggregateCodeCoverageReportResults", conf -> {
-            conf.setDescription("Resolvable configuration used to gather files for the dependency size report aggregation via ArtifactViews, not intended to be used directly");
-            conf.extendsFrom(dependencySizeAggregation.get());
-            project.getPlugins().withType(JavaBasePlugin.class, plugin -> {
-                // If the current project is jvm-based, aggregate dependent projects as jvm-based as well.
-                getEcosystemUtilities().configureAsRuntimeClasspath(conf);
-            });
-        });
-
-        TaskProvider<@NonNull ListDependencySizeTask> dependencySize = project.getTasks().register("hek", ListDependencySizeTask.class, task -> {
-
-        });
-        // project.getArtifacts().add("dependency-downloader", project.getLayout().getBuildDirectory().file("dependency-downloader"), hek);
         project.artifacts(artifactHandler -> {
-            artifactHandler.add(dependencySizeAggregation.getName(), dependencySize);
+            artifactHandler.add(dependencySizeConfiguration.getName(), dependencySizeTask);
         });
-
     }
 }

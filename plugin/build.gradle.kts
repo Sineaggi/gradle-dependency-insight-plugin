@@ -43,9 +43,13 @@ testing {
 
 gradlePlugin {
     // Define the plugin
-    val greeting by plugins.creating {
+    val dependencySizeReport by plugins.creating {
         id = "dependency-size-report"
         implementationClass = "org.example.DependencySizeReportPlugin"
+    }
+    val dependencySizeReportAggregation by plugins.creating {
+        id = "dependency-size-report-aggregation"
+        implementationClass = "org.example.DependencySizeReportAggregationPlugin"
     }
 }
 

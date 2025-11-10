@@ -5,9 +5,11 @@ import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier;
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.jspecify.annotations.NonNull;
@@ -22,7 +24,7 @@ import java.util.Comparator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ListDependencySizeTask extends DefaultTask {
+public class DependencySizeTask extends DefaultTask {
 
     sealed interface Reference extends Serializable {
         public record GAV(String groupId, String artifactId, String version) implements Reference {
@@ -38,11 +40,11 @@ public class ListDependencySizeTask extends DefaultTask {
     public record Holder(Reference reference, String path, long size) implements Serializable {
     }
 
-    private final SetProperty<Holder> holders = getProject().getObjects().setProperty(Holder.class);
+    private final SetProperty<@NonNull Holder> holders = getProject().getObjects().setProperty(Holder.class);
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
 
     @Input
-    public SetProperty<Holder> getHolders() {
+    public SetProperty<@NonNull Holder> getHolders() {
         return holders;
     }
 
@@ -51,7 +53,7 @@ public class ListDependencySizeTask extends DefaultTask {
         return outputFile;
     }
 
-    public ListDependencySizeTask() {
+    public DependencySizeTask() {
         this.holders.addAll(ccCompatibleAction());
         this.outputFile.convention(getProject().getLayout().getBuildDirectory().file("reports/dependency-size/data.bin"));
     }
