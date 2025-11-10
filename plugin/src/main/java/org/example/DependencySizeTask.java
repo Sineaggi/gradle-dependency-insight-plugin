@@ -37,7 +37,8 @@ public class DependencySizeTask extends DefaultTask {
         }
     }
 
-    public record Holder(Reference reference, String path, long size) implements Serializable {
+    public record Holder(String configurationName, Reference reference, String path,
+                         long size) implements Serializable {
     }
 
     private final SetProperty<@NonNull Holder> holders = getProject().getObjects().setProperty(Holder.class);
@@ -65,7 +66,7 @@ public class DependencySizeTask extends DefaultTask {
         ArrayList<Holder> data = new ArrayList<>(holders.get());
         data.sort(Comparator.comparing(Holder::path));
         try (OutputStream os = Files.newOutputStream(outputFile.get().getAsFile().toPath());
-        ObjectOutputStream oos = new ObjectOutputStream(os)) {
+             ObjectOutputStream oos = new ObjectOutputStream(os)) {
             oos.writeObject(data);
         } catch (IOException e) {
             throw new GradleException("failed to write", e);
@@ -89,10 +90,10 @@ public class DependencySizeTask extends DefaultTask {
                 });
             }).getArtifacts().getResolvedArtifacts().map(artifactResults -> artifactResults.stream().flatMap(artifactResult -> {
                 if (artifactResult.getVariant().getOwner() instanceof ModuleComponentIdentifier id) {
-                    return Stream.of(new Holder(new Reference.GAV(id.getGroup(), id.getModule(), id.getVersion()), artifactResult.getFile().getAbsolutePath(), artifactResult.getFile().length()));
+                    return Stream.of(new Holder(configuration.getName(), new Reference.GAV(id.getGroup(), id.getModule(), id.getVersion()), artifactResult.getFile().getAbsolutePath(), artifactResult.getFile().length()));
                 } else if (artifactResult.getVariant().getOwner() instanceof ProjectComponentIdentifier id) {
                     // todo: this should no longer be possible.
-                    return Stream.of(new Holder(new Reference.ProjectPath(id.getProjectName(), id.getProjectPath()), artifactResult.getFile().getAbsolutePath(), artifactResult.getFile().length()));
+                    return Stream.of(new Holder(configuration.getName(), new Reference.ProjectPath(id.getProjectName(), id.getProjectPath()), artifactResult.getFile().getAbsolutePath(), artifactResult.getFile().length()));
                 } else {
                     // todo: use project warnings to let devs know things haven't gone to plan
                     // throw new GradleException("Unknown project id " + j.getVariant().getOwner().getClass());
