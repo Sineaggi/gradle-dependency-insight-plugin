@@ -9,18 +9,16 @@ import java.nio.file.Path;
 
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.BuildResult;
+import org.gradle.testkit.runner.TaskOutcome;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * A simple functional test for the 'org.example.greeting' plugin.
  */
 class DependencySizeReportPluginFunctionalTest {
-    //@TempDir
-    //File projectDir;
-
     private Path getBuildFile(Path projectDir) {
         return projectDir.resolve("build.gradle");
     }
@@ -34,7 +32,14 @@ class DependencySizeReportPluginFunctionalTest {
         writeString(getBuildFile(projectDir),
                 """
                         plugins {
-                          id('dependency-size-insight')
+                          id('java')
+                          id('dependency-size-report')
+                        }
+                        repositories {
+                          mavenCentral()
+                        }
+                        dependencies {
+                          implementation('com.google.guava:guava:33.5.0-jre')
                         }
                         """);
 
@@ -42,12 +47,19 @@ class DependencySizeReportPluginFunctionalTest {
         GradleRunner runner = GradleRunner.create();
         runner.forwardOutput();
         runner.withPluginClasspath();
-        runner.withArguments("greeting");
+        runner.withArguments("dependencySize");
         runner.withProjectDir(projectDir.toFile());
         BuildResult result = runner.build();
+        BuildResult rerunResult = runner.build();
 
         // Verify the result
-        assertTrue(result.getOutput().contains("Hello from plugin 'org.example.greeting'"));
+        var task = result.task(":dependencySize");
+        assertNotNull(task);
+        assertEquals(TaskOutcome.SUCCESS, task.getOutcome());
+
+        var rerunTask = rerunResult.task(":dependencySize");
+        assertNotNull(rerunTask);
+        assertEquals(TaskOutcome.UP_TO_DATE, rerunTask.getOutcome());
     }
 
     private void writeString(Path file, String string) throws IOException {
