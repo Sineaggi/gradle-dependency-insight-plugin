@@ -1,5 +1,10 @@
 plugins {
     `java-gradle-plugin`
+    id("com.google.protobuf") version "0.9.5"
+}
+
+dependencies {
+    compileOnly("com.google.protobuf:protobuf-java:4.33.1")
 }
 
 testing {
@@ -37,4 +42,10 @@ gradlePlugin.testSourceSets.add(sourceSets["functionalTest"])
 
 tasks.named<Task>("check") {
     dependsOn(testing.suites.named("functionalTest"))
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:4.33.1"
+    }
 }

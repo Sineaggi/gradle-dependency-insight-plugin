@@ -19,12 +19,15 @@ public abstract class DependencySizeReportPlugin implements Plugin<Project> {
     public static final String DEPENDENCY_SIZE_CONFIGURATION_NAME = "dependencySize";
 
     public void apply(Project project) {
+        project.getPlugins().apply(DependencySizeBasePlugin.class);
         NamedDomainObjectProvider<Configuration> dependencySizeConfiguration = project.getConfigurations().register(DEPENDENCY_SIZE_CONFIGURATION_NAME, (conf) -> {
             conf.attributes(attributes -> {
                 attributes.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, "binary");
             });
         });
+        NamedDomainObjectProvider<Configuration> dependencySizeTooling = project.getConfigurations().named("dependencySizeTooling");
         TaskProvider<@NonNull DependencySizeTask> dependencySizeTask = project.getTasks().register("dependencySize", DependencySizeTask.class, task -> {
+            task.getWorkerClasspath().from(dependencySizeTooling);
         });
         project.artifacts(artifactHandler -> {
             artifactHandler.add(dependencySizeConfiguration.getName(), dependencySizeTask);

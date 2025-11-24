@@ -36,6 +36,8 @@ public abstract class DependencySizeReportAggregationPlugin implements Plugin<Pr
         project.getPluginManager().apply("jvm-ecosystem");
         project.getPluginManager().apply("dependency-size-report");
 
+        project.getPlugins().apply(DependencySizeBasePlugin.class);
+
         ObjectFactory objects = project.getObjects();
         ConfigurationContainer configurations = project.getConfigurations();
         NamedDomainObjectProvider<@NonNull DependencyScopeConfiguration> dependencySizeAggregation = configurations.dependencyScope(DEPENDENCY_SIZE_AGGREGATION_CONFIGURATION_NAME, conf -> {
@@ -67,6 +69,8 @@ public abstract class DependencySizeReportAggregationPlugin implements Plugin<Pr
             }).getFiles());
 
             configureReportTaskInputs(task, executionData);
+
+            task.getWorkerClasspath().from(project.getConfigurations().named(DependencySizeBasePlugin.DEPENDENCY_SIZE_TOOLING));
         }));
         reporting.getReports().register("dependencySizeReport", DependencySizeReport.class, (report) -> {
         });

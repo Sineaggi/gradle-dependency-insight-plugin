@@ -1,26 +1,19 @@
 package org.example;
 
+import org.example.internal.DependencyReportWorkAction;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier;
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.SetProperty;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.OutputFile;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
+import org.gradle.workers.WorkerExecutor;
 import org.jspecify.annotations.NonNull;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
+import javax.inject.Inject;
 import java.io.Serializable;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,6 +36,7 @@ public class DependencySizeTask extends DefaultTask {
 
     private final SetProperty<@NonNull Holder> holders = getProject().getObjects().setProperty(Holder.class);
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
+    private final ConfigurableFileCollection workerClasspath = getProject().getObjects().fileCollection();
 
     @Input
     public SetProperty<@NonNull Holder> getHolders() {
@@ -54,23 +48,38 @@ public class DependencySizeTask extends DefaultTask {
         return outputFile;
     }
 
-    public DependencySizeTask() {
+    @Classpath
+    public ConfigurableFileCollection getWorkerClasspath() {
+        return workerClasspath;
+    }
+
+    private final WorkerExecutor workerExecutor;
+
+    @Inject
+    public DependencySizeTask(WorkerExecutor workerExecutor) {
         this.holders.addAll(ccCompatibleAction());
         this.outputFile.convention(getProject().getLayout().getBuildDirectory().file("reports/dependency-size/data.bin"));
+        this.workerExecutor = workerExecutor;
     }
 
     @TaskAction
     public void run() {
         System.out.println(holders.get());
         System.out.println(holders.get().stream().mapToLong(Holder::size).sum() / 1000.0f / 1000.0f + "MiB");
-        ArrayList<Holder> data = new ArrayList<>(holders.get());
-        data.sort(Comparator.comparing(Holder::path));
-        try (OutputStream os = Files.newOutputStream(outputFile.get().getAsFile().toPath());
-             ObjectOutputStream oos = new ObjectOutputStream(os)) {
-            oos.writeObject(data);
-        } catch (IOException e) {
-            throw new GradleException("failed to write", e);
-        }
+        //ArrayList<Holder> data = new ArrayList<>(holders.get());
+        //data.sort(Comparator.comparing(Holder::path));
+        //try (OutputStream os = Files.newOutputStream(outputFile.get().getAsFile().toPath());
+        //     ObjectOutputStream oos = new ObjectOutputStream(os)) {
+        //    oos.writeObject(data);
+        //} catch (IOException e) {
+        //    throw new GradleException("failed to write", e);
+        //}
+        workerExecutor.classLoaderIsolation(f -> {
+            f.getClasspath().from(getWorkerClasspath());
+        }).submit(DependencyReportWorkAction.class, action -> {
+            action.getOutputFile().convention(getOutputFile());
+            action.getHolders().set(getHolders());
+        });
     }
 
     private SetProperty<@NonNull Holder> ccCompatibleAction() {

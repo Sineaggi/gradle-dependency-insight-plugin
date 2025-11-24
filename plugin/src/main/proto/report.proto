@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package com.example;
+
+option java_multiple_files = true;
+option java_package = "com.example.protos";
+option java_outer_classname = "DependencySizeProtos";
+
+message Holder {
+    string configurationName = 1;
+    string path = 2;
+    int64 size = 3;
+}
+
+message Report {
+    repeated Holder holders = 1;
+}
+
+message AggregateReports {
+  repeated Report reports = 1;
+}

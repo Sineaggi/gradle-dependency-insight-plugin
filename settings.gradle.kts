@@ -5,6 +5,10 @@ dependencyResolutionManagement {
     }
 }
 
+plugins {
+    id("com.google.protobuf") version "0.9.5" apply false
+}
+
 rootProject.name = "gradle-dependency-size"
 include("plugin")
 
