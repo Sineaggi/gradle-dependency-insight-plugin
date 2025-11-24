@@ -5,6 +5,7 @@ import com.example.protos.Report;
 import org.example.DependencySizeTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.workers.WorkAction;
 import org.gradle.workers.WorkParameters;
@@ -16,18 +17,30 @@ import java.util.List;
 public abstract class DependencyReportWorkAction implements WorkAction<DependencyReportWorkAction.WriterActionParameters> {
     public interface WriterActionParameters extends WorkParameters {
         SetProperty<DependencySizeTask.Holder> getHolders();
+        Property<String> getProjectPath();
         RegularFileProperty getOutputFile();
     }
 
     @Override
     public void execute() {
         // todo: read all others, create combined report.
-        List<Holder> holders = getParameters().getHolders().get().stream().map(f -> {
+        List<Holder> holders = getParameters().getHolders().get().stream().map(holder -> {
+            DependencySizeTask.Reference.GAV gav = (DependencySizeTask.Reference.GAV) holder.reference();
             return Holder.newBuilder()
+                    .setGav(gav.toString())
+                    .setGroup(gav.groupId())
+                    .setArtifact(gav.artifactId())
+                    .setVersion(gav.version())
+                    .setConfigurationName(holder.configurationName())
+                    .setPath(holder.path())
+                    .setSize(holder.size())
                     .build();
         }).toList();
 
-        Report report = Report.newBuilder().addAllHolders(holders).build();
+        Report report = Report.newBuilder()
+                .addAllHolders(holders)
+                .setProjectPath(getParameters().getProjectPath().get())
+                .build();
 
         try {
             Files.write(getParameters().getOutputFile().get().getAsFile().toPath(), report.toByteArray());

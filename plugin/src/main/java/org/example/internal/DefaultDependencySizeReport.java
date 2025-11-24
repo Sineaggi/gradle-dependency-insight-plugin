@@ -14,7 +14,6 @@ public class DefaultDependencySizeReport implements DependencySizeReport {
 
     @Inject
     public DefaultDependencySizeReport(String name, TaskContainer tasks) {
-        System.out.println("oye");
         this.name = name;
         reportTask = tasks.register("dependencySizeReport", DependencySizeAggregationTask.class, task -> {
             task.setGroup("verification");

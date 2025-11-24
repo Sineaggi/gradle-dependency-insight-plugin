@@ -25,15 +25,6 @@ public abstract class DependencySizeAggregationTask extends DefaultTask {
 
     @TaskAction
     public void go() {
-        //List<DependencySizeTask.Holder> holders = new ArrayList<>();
-        //for (File file : others.getFiles()) {
-        //    try (InputStream is = Files.newInputStream(file.toPath());
-        //         ObjectInputStream ois = new ObjectInputStream(is)) {
-        //        holders.addAll((List) ois.readObject());
-        //    } catch (IOException | ClassNotFoundException e) {
-        //        throw new GradleException("failed to read", e);
-        //    }
-        //}
         WorkerExecutor workerExecutor = getWorkerExecutor();
         workerExecutor.classLoaderIsolation(spec -> {
             spec.getClasspath().from(getWorkerClasspath());
@@ -41,6 +32,5 @@ public abstract class DependencySizeAggregationTask extends DefaultTask {
             parameters.getOthers().from(getOthers());
             //parameters.getOutputFile().convention(getProject().getLayout().getBuildDirectory().file("reports/combined/yolo.txt"));
         });
-        //System.out.println("totals " + holders.stream().mapToLong(DependencySizeTask.Holder::size).sum() / 1000.0f / 1000.0f + "MiB");
     }
 }

@@ -10,10 +10,15 @@ message Holder {
     string configurationName = 1;
     string path = 2;
     int64 size = 3;
+    string gav = 4;
+    string group = 5;
+    string artifact = 6;
+    string version = 7;
 }
 
 message Report {
     repeated Holder holders = 1;
+    string projectPath = 2;
 }
 
 message AggregateReports {

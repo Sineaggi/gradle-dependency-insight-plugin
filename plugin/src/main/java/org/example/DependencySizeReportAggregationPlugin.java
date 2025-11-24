@@ -54,7 +54,6 @@ public abstract class DependencySizeReportAggregationPlugin implements Plugin<Pr
         });
 
         ReportingExtension reporting = project.getExtensions().getByType(ReportingExtension.class);
-        System.out.println("reportyor");
         reporting.getReports().registerBinding(DependencySizeReport.class, DefaultDependencySizeReport.class);
         reporting.getReports().withType(DependencySizeReport.class).all((report) -> report.getReportTask().configure((task) -> {
             Provider<@NonNull FileCollection> executionData = dependencySizeResultsConf.map((conf) -> conf.getIncoming().artifactView((view) -> {

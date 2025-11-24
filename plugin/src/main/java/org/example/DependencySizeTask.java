@@ -7,6 +7,7 @@ import org.gradle.api.artifacts.component.ModuleComponentIdentifier;
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.*;
 import org.gradle.workers.WorkerExecutor;
@@ -19,7 +20,7 @@ import java.util.stream.Stream;
 
 public class DependencySizeTask extends DefaultTask {
 
-    sealed interface Reference extends Serializable {
+    public sealed interface Reference extends Serializable {
         public record GAV(String groupId, String artifactId, String version) implements Reference {
         }
 
@@ -37,6 +38,7 @@ public class DependencySizeTask extends DefaultTask {
     private final SetProperty<@NonNull Holder> holders = getProject().getObjects().setProperty(Holder.class);
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
     private final ConfigurableFileCollection workerClasspath = getProject().getObjects().fileCollection();
+    private final Property<String> projectId = getProject().getObjects().property(String.class);
 
     @Input
     public SetProperty<@NonNull Holder> getHolders() {
@@ -53,6 +55,11 @@ public class DependencySizeTask extends DefaultTask {
         return workerClasspath;
     }
 
+    @Input
+    public Property<String> getProjectId() {
+        return projectId;
+    };
+
     private final WorkerExecutor workerExecutor;
 
     @Inject
@@ -60,25 +67,17 @@ public class DependencySizeTask extends DefaultTask {
         this.holders.addAll(ccCompatibleAction());
         this.outputFile.convention(getProject().getLayout().getBuildDirectory().file("reports/dependency-size/data.bin"));
         this.workerExecutor = workerExecutor;
+        this.projectId.convention(getProject().getPath());
     }
 
     @TaskAction
     public void run() {
-        System.out.println(holders.get());
-        System.out.println(holders.get().stream().mapToLong(Holder::size).sum() / 1000.0f / 1000.0f + "MiB");
-        //ArrayList<Holder> data = new ArrayList<>(holders.get());
-        //data.sort(Comparator.comparing(Holder::path));
-        //try (OutputStream os = Files.newOutputStream(outputFile.get().getAsFile().toPath());
-        //     ObjectOutputStream oos = new ObjectOutputStream(os)) {
-        //    oos.writeObject(data);
-        //} catch (IOException e) {
-        //    throw new GradleException("failed to write", e);
-        //}
         workerExecutor.classLoaderIsolation(f -> {
             f.getClasspath().from(getWorkerClasspath());
         }).submit(DependencyReportWorkAction.class, action -> {
             action.getOutputFile().convention(getOutputFile());
             action.getHolders().set(getHolders());
+            action.getProjectPath().convention(getProjectId());
         });
     }
 
