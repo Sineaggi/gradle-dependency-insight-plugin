@@ -3,9 +3,11 @@
  */
 package org.example;
 
+import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Project;
 import org.gradle.api.Plugin;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.type.ArtifactTypeDefinition;
 import org.gradle.api.tasks.TaskProvider;
 import org.jspecify.annotations.NonNull;
 
@@ -17,7 +19,11 @@ public abstract class DependencySizeReportPlugin implements Plugin<Project> {
     public static final String DEPENDENCY_SIZE_CONFIGURATION_NAME = "dependencySize";
 
     public void apply(Project project) {
-        Configuration dependencySizeConfiguration = project.getConfigurations().create(DEPENDENCY_SIZE_CONFIGURATION_NAME);
+        NamedDomainObjectProvider<Configuration> dependencySizeConfiguration = project.getConfigurations().register(DEPENDENCY_SIZE_CONFIGURATION_NAME, (conf) -> {
+            conf.attributes(attributes -> {
+                attributes.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, "binary");
+            });
+        });
         TaskProvider<@NonNull DependencySizeTask> dependencySizeTask = project.getTasks().register("dependencySize", DependencySizeTask.class, task -> {
         });
         project.artifacts(artifactHandler -> {
