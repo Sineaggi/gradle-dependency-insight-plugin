@@ -52,6 +52,10 @@ public abstract class DependencyReportAggregationWorkAction implements WorkActio
         }
         System.out.println("Total deps " + simpleDeps.size());
         System.out.println("Total dep size " + simpleDeps.stream().mapToLong(SimpleDep::size).sum() / 1000.0f / 1000.0f + "MiB");
+        System.out.println("Top 10");
+        System.out.println(simpleDeps.stream().sorted(Comparator.comparingLong(SimpleDep::size).reversed()).limit(10).toList());
+        System.out.println("Bottom 10");
+        System.out.println(simpleDeps.stream().sorted(Comparator.comparingLong(SimpleDep::size)).limit(10).toList());
     }
 
     record SimpleDep(
