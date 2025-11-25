@@ -44,7 +44,7 @@ public abstract class DependencySizeReportAggregationPlugin implements Plugin<Pr
             conf.setDescription("Collects project dependencies for purposes of dependency size report aggregation");
         });
 
-        NamedDomainObjectProvider<@NonNull ResolvableConfiguration> dependencySizeResultsConf = configurations.resolvable("aggregateCodeCoverageReportResults", conf -> {
+        NamedDomainObjectProvider<@NonNull ResolvableConfiguration> dependencySizeResultsConf = configurations.resolvable("aggregateDependencySizeReportResults", conf -> {
             conf.setDescription("Resolvable configuration used to gather files for the dependency size report aggregation via ArtifactViews, not intended to be used directly");
             conf.extendsFrom(dependencySizeAggregation.get());
             project.getPlugins().withType(JavaBasePlugin.class, plugin -> {

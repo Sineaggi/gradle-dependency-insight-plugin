@@ -12,6 +12,8 @@ import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,26 +22,27 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class DependencySizeReportPluginFunctionalTest {
     private Path getBuildFile(Path projectDir) {
-        return projectDir.resolve("build.gradle");
+        return projectDir.resolve("build.gradle.kts");
     }
 
     private Path getSettingsFile(Path projectDir) {
         return projectDir.resolve("settings.gradle");
     }
 
-    @Test void canRunTask(@TempDir Path projectDir) throws IOException {
+    @Test
+    void canRunTask(@TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir), "");
         writeString(getBuildFile(projectDir),
                 """
                         plugins {
-                          id('java')
-                          id('dependency-size-report')
+                          id("java")
+                          id("dependency-size-report")
                         }
                         repositories {
                           mavenCentral()
                         }
                         dependencies {
-                          implementation('com.google.guava:guava:33.5.0-jre')
+                          implementation("com.google.guava:guava:33.5.0-jre")
                         }
                         """);
 
@@ -60,6 +63,113 @@ class DependencySizeReportPluginFunctionalTest {
         var rerunTask = rerunResult.task(":dependencySize");
         assertNotNull(rerunTask);
         assertEquals(TaskOutcome.UP_TO_DATE, rerunTask.getOutcome());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"9.3.0-milestone-1", "9.2.1", "8.14.3"})
+    public void worksOnVersions(String version, @TempDir Path projectDir) throws IOException {
+        writeString(getSettingsFile(projectDir), "");
+        writeString(getBuildFile(projectDir),
+                """
+                        plugins {
+                          id("java")
+                          id("dependency-size-report")
+                        }
+                        repositories {
+                          mavenCentral()
+                        }
+                        dependencies {
+                          implementation("com.google.guava:guava:33.5.0-jre")
+                        }
+                        """);
+
+        // Run the build
+        GradleRunner runner = GradleRunner.create();
+        runner.forwardOutput();
+        runner.withPluginClasspath();
+        runner.withArguments("dependencySize");
+        runner.withProjectDir(projectDir.toFile());
+        runner.withGradleVersion(version);
+        BuildResult result = runner.build();
+        BuildResult rerunResult = runner.build();
+
+        // Verify the result
+        var task = result.task(":dependencySize");
+        assertNotNull(task);
+        assertEquals(TaskOutcome.SUCCESS, task.getOutcome());
+
+        var tek = result.task(":classes");
+        System.out.println(tek);
+        System.out.println(result.getTasks());
+
+        var rerunTask = rerunResult.task(":dependencySize");
+        assertNotNull(rerunTask);
+        assertEquals(TaskOutcome.UP_TO_DATE, rerunTask.getOutcome());
+    }
+
+    @Test
+    public void recursiveTest(@TempDir Path projectDir) throws IOException {
+        writeString(getSettingsFile(projectDir), """
+                include("lib")
+                """);
+        writeString(getBuildFile(projectDir),
+                """
+                        plugins {
+                          id("java")
+                          id("dependency-size-report-aggregation")
+                          id("dependency-size-report")
+                        }
+                        repositories {
+                          mavenCentral()
+                        }
+                        dependencies {
+                          implementation("com.google.guava:guava:33.5.0-jre!!")
+                          dependencySizeAggregation(project)
+                        }
+                        dependencies {
+                          subprojects.forEach {
+                            it.plugins.withId("java") {
+                              it.plugins.apply("dependency-size-report")
+                              dependencySizeAggregation(it)
+                            }
+                          }
+                        }
+                        """);
+        var libDir = projectDir.resolve("lib");
+        Files.createDirectories(libDir);
+        writeString(getBuildFile(libDir),
+                """
+                        plugins {
+                          id("java")
+                          //id("dependency-size-report")
+                        }
+                        repositories {
+                          mavenCentral()
+                        }
+                        dependencies {
+                          implementation("com.google.guava:guava:33.4.8-jre!!")
+                        }
+                        """);
+
+        // Run the build
+        GradleRunner runner = GradleRunner.create();
+        runner.forwardOutput();
+        runner.withPluginClasspath();
+        runner.withArguments("dependencySizeReport", "--stacktrace");
+        runner.withProjectDir(projectDir.toFile());
+        BuildResult result = runner.build();
+        BuildResult rerunResult = runner.build();
+
+        // Verify the result
+        var task = result.task(":dependencySizeReport");
+        assertNotNull(task);
+        assertEquals(TaskOutcome.SUCCESS, task.getOutcome());
+
+        System.out.println(result.getTasks());
+
+        // var rerunTask = rerunResult.task(":dependencySizeReport");
+        // assertNotNull(rerunTask);
+        // assertEquals(TaskOutcome.UP_TO_DATE, rerunTask.getOutcome());
     }
 
     private void writeString(Path file, String string) throws IOException {
