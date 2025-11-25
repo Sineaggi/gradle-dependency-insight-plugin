@@ -12,9 +12,11 @@ import org.gradle.workers.WorkParameters;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public abstract class DependencyReportAggregationWorkAction implements WorkAction<DependencyReportAggregationWorkAction.WriterActionParameters> {
     public interface WriterActionParameters extends WorkParameters {
@@ -53,9 +55,9 @@ public abstract class DependencyReportAggregationWorkAction implements WorkActio
         System.out.println("Total deps " + simpleDeps.size());
         System.out.println("Total dep size " + simpleDeps.stream().mapToLong(SimpleDep::size).sum() / 1000.0f / 1000.0f + "MiB");
         System.out.println("Top 10");
-        System.out.println(simpleDeps.stream().sorted(Comparator.comparingLong(SimpleDep::size).reversed()).limit(10).toList());
+        System.out.println(simpleDeps.stream().sorted(Comparator.comparingLong(SimpleDep::size).reversed()).limit(10).map(Record::toString).collect(Collectors.joining("\n")));
         System.out.println("Bottom 10");
-        System.out.println(simpleDeps.stream().sorted(Comparator.comparingLong(SimpleDep::size)).limit(10).toList());
+        System.out.println(simpleDeps.stream().sorted(Comparator.comparingLong(SimpleDep::size)).limit(10).map(Record::toString).collect(Collectors.joining("\n")));
     }
 
     record SimpleDep(

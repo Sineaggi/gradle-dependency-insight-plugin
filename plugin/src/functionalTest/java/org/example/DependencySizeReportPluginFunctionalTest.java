@@ -127,10 +127,10 @@ class DependencySizeReportPluginFunctionalTest {
                           dependencySizeAggregation(project)
                         }
                         dependencies {
-                          subprojects.forEach {
-                            it.plugins.withId("java") {
-                              it.plugins.apply("dependency-size-report")
-                              dependencySizeAggregation(it)
+                          subprojects.forEach { subproject ->
+                            subproject.plugins.withId("java") {
+                              subproject.plugins.apply("dependency-size-report")
+                              dependencySizeAggregation(project(subproject.path, "dependencySize"))
                             }
                           }
                         }
