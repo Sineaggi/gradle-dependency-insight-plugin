@@ -93,7 +93,6 @@ public class ProjectDependencySizeReport extends DefaultTask {
                         throw new RuntimeException("fuck 2");
                     }
                     //System.out.println(j.getVariant().getOwner().getClass());
-
                 }).collect(Collectors.toSet());
             });
 
