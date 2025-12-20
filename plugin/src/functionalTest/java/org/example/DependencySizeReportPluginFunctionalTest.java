@@ -24,6 +24,44 @@ class DependencySizeReportPluginFunctionalTest {
     }
 
     @Test
+    void basicApply(@TempDir Path projectDir) throws IOException {
+        writeString(getSettingsFile(projectDir), "");
+        writeString(getBuildFile(projectDir),
+                """
+                        plugins {
+                          id("java")
+                          id("dependency-size-report")
+                        }
+                        repositories {
+                          mavenCentral()
+                        }
+                        dependencies {
+                          implementation("com.google.guava:guava:33.5.0-jre2")
+                        }
+                        """);
+
+        // Run the build
+        GradleRunner runner = GradleRunner.create();
+        runner.forwardOutput();
+        runner.withPluginClasspath();
+        runner.withArguments("tasks", "--configuration-cache");
+        runner.withProjectDir(projectDir.toFile());
+        BuildResult result = runner.build();
+        BuildResult rerunResult = runner.build();
+
+        // Verify the result
+        var task = result.task(":tasks");
+        assertNotNull(task);
+        assertEquals(TaskOutcome.SUCCESS, task.getOutcome());
+        assertTrue(result.getOutput().contains("Configuration cache entry stored."));
+
+        var rerunTask = rerunResult.task(":tasks");
+        assertNotNull(rerunTask);
+        assertEquals(TaskOutcome.SUCCESS, rerunTask.getOutcome());
+        assertTrue(rerunResult.getOutput().contains("Configuration cache entry reused."));
+    }
+
+    @Test
     void canRunTask(@TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir), "");
         writeString(getBuildFile(projectDir),
@@ -44,7 +82,7 @@ class DependencySizeReportPluginFunctionalTest {
         GradleRunner runner = GradleRunner.create();
         runner.forwardOutput();
         runner.withPluginClasspath();
-        runner.withArguments("dependencySize");
+        runner.withArguments("dependencySize", "--configuration-cache");
         runner.withProjectDir(projectDir.toFile());
         BuildResult result = runner.build();
         BuildResult rerunResult = runner.build();
@@ -53,10 +91,12 @@ class DependencySizeReportPluginFunctionalTest {
         var task = result.task(":dependencySize");
         assertNotNull(task);
         assertEquals(TaskOutcome.SUCCESS, task.getOutcome());
+        assertTrue(result.getOutput().contains("Configuration cache entry stored."));
 
         var rerunTask = rerunResult.task(":dependencySize");
         assertNotNull(rerunTask);
         assertEquals(TaskOutcome.UP_TO_DATE, rerunTask.getOutcome());
+        assertTrue(rerunResult.getOutput().contains("Configuration cache entry reused."));
     }
 
     @ParameterizedTest
@@ -99,6 +139,64 @@ class DependencySizeReportPluginFunctionalTest {
         var rerunTask = rerunResult.task(":dependencySize");
         assertNotNull(rerunTask);
         assertEquals(TaskOutcome.UP_TO_DATE, rerunTask.getOutcome());
+    }
+
+    @Test
+    public void multiProjectTest(@TempDir Path projectDir) throws IOException {
+        writeString(getSettingsFile(projectDir), """
+                include("lib")
+                """);
+        writeString(getBuildFile(projectDir),
+                """
+                        plugins {
+                          id("java")
+                          id("dependency-size-report-aggregation")
+                          id("dependency-size-report")
+                        }
+                        repositories {
+                          mavenCentral()
+                        }
+                        dependencies {
+                          implementation("com.google.guava:guava:33.5.0-jre!!")
+                          dependencySizeAggregation(project)
+                          dependencySizeAggregation(project(":lib", "dependencySize"))
+                        }
+                        """);
+        var libDir = projectDir.resolve("lib");
+        Files.createDirectories(libDir);
+        writeString(getBuildFile(libDir),
+                """
+                        plugins {
+                          id("java")
+                          id("dependency-size-report")
+                        }
+                        repositories {
+                          mavenCentral()
+                        }
+                        dependencies {
+                          implementation("com.google.guava:guava:33.4.8-jre!!")
+                        }
+                        """);
+
+        // Run the build
+        GradleRunner runner = GradleRunner.create();
+        runner.forwardOutput();
+        runner.withPluginClasspath();
+        runner.withArguments("dependencySizeReport", "--stacktrace");
+        runner.withProjectDir(projectDir.toFile());
+        BuildResult result = runner.build();
+        BuildResult rerunResult = runner.build();
+
+        // Verify the result
+        var task = result.task(":dependencySizeReport");
+        assertNotNull(task);
+        assertEquals(TaskOutcome.SUCCESS, task.getOutcome());
+
+        System.out.println(result.getTasks());
+
+        // var rerunTask = rerunResult.task(":dependencySizeReport");
+        // assertNotNull(rerunTask);
+        // assertEquals(TaskOutcome.UP_TO_DATE, rerunTask.getOutcome());
     }
 
     @Test

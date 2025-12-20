@@ -6,8 +6,10 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier;
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.*;
 import org.gradle.workers.WorkerExecutor;
@@ -64,9 +66,9 @@ public class DependencySizeTask extends DefaultTask {
     private final WorkerExecutor workerExecutor;
 
     @Inject
-    public DependencySizeTask(WorkerExecutor workerExecutor) {
-        this.holders.addAll(ccCompatibleAction());
-        this.outputFile.convention(getProject().getLayout().getBuildDirectory().file("reports/dependency-size/data.bin"));
+    public DependencySizeTask(WorkerExecutor workerExecutor, ProviderFactory providers, ProjectLayout layout) {
+        this.holders.convention(providers.provider(() -> ccCompatibleAction().get()));
+        this.outputFile.convention(layout.getBuildDirectory().file("reports/dependency-size/data.bin"));
         this.workerExecutor = workerExecutor;
         this.projectId.convention(getProject().getPath());
     }
