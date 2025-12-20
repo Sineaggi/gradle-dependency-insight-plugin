@@ -12,9 +12,7 @@ import org.gradle.api.artifacts.type.ArtifactTypeDefinition;
 import org.gradle.api.tasks.TaskProvider;
 import org.jspecify.annotations.NonNull;
 
-/**
- * A simple 'hello world' plugin.
- */
+@SuppressWarnings("unused")
 public abstract class DependencySizeReportPlugin implements Plugin<Project> {
 
     public static final String DEPENDENCY_SIZE_CONFIGURATION_NAME = "dependencySize";

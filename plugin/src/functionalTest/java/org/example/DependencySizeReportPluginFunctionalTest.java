@@ -100,7 +100,7 @@ class DependencySizeReportPluginFunctionalTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"9.3.0-milestone-1", "9.2.1", "8.14.3"})
+    @ValueSource(strings = {"9.3.0-milestone-1", "9.2.1", "8.14.3", "8.6"})
     public void worksOnVersions(String version, @TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir), "");
         writeString(getBuildFile(projectDir),

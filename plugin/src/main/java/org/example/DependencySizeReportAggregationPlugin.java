@@ -23,6 +23,7 @@ import org.jspecify.annotations.NonNull;
 
 import javax.inject.Inject;
 
+@SuppressWarnings("unused")
 public abstract class DependencySizeReportAggregationPlugin implements Plugin<Project> {
 
     public static final String DEPENDENCY_SIZE_AGGREGATION_CONFIGURATION_NAME = "dependencySizeAggregation";
