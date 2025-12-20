@@ -29,11 +29,11 @@ testing {
 }
 
 gradlePlugin {
-    val dependencySizeReport by plugins.creating {
+    val dependencySizeReport by plugins.registering {
         id = "dependency-size-report"
         implementationClass = "org.example.DependencySizeReportPlugin"
     }
-    val dependencySizeReportAggregation by plugins.creating {
+    val dependencySizeReportAggregation by plugins.registering {
         id = "dependency-size-report-aggregation"
         implementationClass = "org.example.DependencySizeReportAggregationPlugin"
     }
