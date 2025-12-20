@@ -182,7 +182,7 @@ class DependencySizeReportPluginFunctionalTest {
         GradleRunner runner = GradleRunner.create();
         runner.forwardOutput();
         runner.withPluginClasspath();
-        runner.withArguments("dependencySizeReport", "--stacktrace");
+        runner.withArguments("dependencySizeReport", "-Dorg.gradle.unsafe.isolated-projects=true", "--stacktrace");
         runner.withProjectDir(projectDir.toFile());
         BuildResult result = runner.build();
         BuildResult rerunResult = runner.build();
@@ -191,12 +191,14 @@ class DependencySizeReportPluginFunctionalTest {
         var task = result.task(":dependencySizeReport");
         assertNotNull(task);
         assertEquals(TaskOutcome.SUCCESS, task.getOutcome());
+        assertTrue(result.getOutput().contains("Configuration cache entry stored."));
 
         System.out.println(result.getTasks());
 
-        // var rerunTask = rerunResult.task(":dependencySizeReport");
-        // assertNotNull(rerunTask);
-        // assertEquals(TaskOutcome.UP_TO_DATE, rerunTask.getOutcome());
+        var rerunTask = rerunResult.task(":dependencySizeReport");
+        assertNotNull(rerunTask);
+        assertEquals(TaskOutcome.SUCCESS, rerunTask.getOutcome());
+        assertTrue(rerunResult.getOutput().contains("Configuration cache entry reused."));
     }
 
     @Test
@@ -259,9 +261,9 @@ class DependencySizeReportPluginFunctionalTest {
 
         System.out.println(result.getTasks());
 
-        // var rerunTask = rerunResult.task(":dependencySizeReport");
-        // assertNotNull(rerunTask);
-        // assertEquals(TaskOutcome.UP_TO_DATE, rerunTask.getOutcome());
+        var rerunTask = rerunResult.task(":dependencySizeReport");
+        assertNotNull(rerunTask);
+        assertEquals(TaskOutcome.SUCCESS, rerunTask.getOutcome());
     }
 
     private void writeString(Path file, String string) throws IOException {
