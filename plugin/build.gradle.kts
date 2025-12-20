@@ -1,10 +1,11 @@
 plugins {
     `java-gradle-plugin`
     id("com.google.protobuf") version "0.9.5"
+    `maven-publish`
 }
 
 dependencies {
-    compileOnly("com.google.protobuf:protobuf-java:4.33.1")
+    compileOnly("com.google.protobuf:protobuf-java:3.25.8")
 }
 
 testing {
@@ -38,6 +39,12 @@ gradlePlugin {
     }
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 gradlePlugin.testSourceSets.add(sourceSets["functionalTest"])
 
 tasks.named<Task>("check") {
@@ -46,6 +53,6 @@ tasks.named<Task>("check") {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:4.33.1"
+        artifact = "com.google.protobuf:protoc:3.25.8"
     }
 }

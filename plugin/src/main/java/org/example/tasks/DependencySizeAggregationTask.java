@@ -1,4 +1,4 @@
-package org.example;
+package org.example.tasks;
 
 import org.example.internal.DependencyReportAggregationWorkAction;
 import org.gradle.api.DefaultTask;

@@ -3,6 +3,7 @@
  */
 package org.example;
 
+import org.example.tasks.DependencySizeTask;
 import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Project;
 import org.gradle.api.Plugin;

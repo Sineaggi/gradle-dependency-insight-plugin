@@ -1,6 +1,6 @@
 package org.example.internal;
 
-import org.example.DependencySizeAggregationTask;
+import org.example.tasks.DependencySizeAggregationTask;
 import org.example.DependencySizeReport;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;

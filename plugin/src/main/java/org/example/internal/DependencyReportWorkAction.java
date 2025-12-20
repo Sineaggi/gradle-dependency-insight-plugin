@@ -2,7 +2,7 @@ package org.example.internal;
 
 import com.example.protos.Holder;
 import com.example.protos.Report;
-import org.example.DependencySizeTask;
+import org.example.tasks.DependencySizeTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;

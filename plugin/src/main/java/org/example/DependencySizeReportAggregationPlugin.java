@@ -2,6 +2,7 @@ package org.example;
 
 import org.example.internal.DefaultDependencySizeReport;
 import org.example.internal.SerializableLambdas;
+import org.example.tasks.DependencySizeAggregationTask;
 import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -11,9 +12,6 @@ import org.gradle.api.artifacts.ResolvableConfiguration;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition;
-import org.gradle.api.attributes.Category;
-import org.gradle.api.attributes.TestSuiteName;
-import org.gradle.api.attributes.VerificationType;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.JavaBasePlugin;

@@ -1,4 +1,4 @@
-package org.example;
+package org.example.tasks;
 
 import org.example.internal.DependencyReportWorkAction;
 import org.gradle.api.DefaultTask;
@@ -10,7 +10,6 @@ import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.*;
-import org.gradle.internal.component.external.model.DefaultModuleComponentIdentifier;
 import org.gradle.workers.WorkerExecutor;
 import org.jspecify.annotations.NonNull;
 
