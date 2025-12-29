@@ -44,7 +44,7 @@ class DependencySizeReportPluginFunctionalTest {
         GradleRunner runner = GradleRunner.create();
         runner.forwardOutput();
         runner.withPluginClasspath();
-        runner.withArguments("tasks", "--configuration-cache");
+        runner.withArguments("tasks", "-Dorg.gradle.unsafe.isolated-projects=true");
         runner.withProjectDir(projectDir.toFile());
         BuildResult result = runner.build();
         BuildResult rerunResult = runner.build();
@@ -82,7 +82,7 @@ class DependencySizeReportPluginFunctionalTest {
         GradleRunner runner = GradleRunner.create();
         runner.forwardOutput();
         runner.withPluginClasspath();
-        runner.withArguments("dependencySize", "--configuration-cache");
+        runner.withArguments("dependencySize", "-Dorg.gradle.unsafe.isolated-projects=true");
         runner.withProjectDir(projectDir.toFile());
         BuildResult result = runner.build();
         BuildResult rerunResult = runner.build();
@@ -100,8 +100,18 @@ class DependencySizeReportPluginFunctionalTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"9.3.0-milestone-1", "9.2.1", "8.14.3", "8.6"})
-    public void worksOnVersions(String version, @TempDir Path projectDir) throws IOException {
+    @ValueSource(strings = {"9.3.0-milestone-1", "9.2.1", "8.14.3"})
+    public void worksOnVersionsWithCC(String version, @TempDir Path projectDir) throws IOException {
+        worksOnVersions(version, projectDir, "dependencySizeReport", "-Dorg.gradle.unsafe.isolated-projects=true", "--stacktrace");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"8.6"})
+    public void worksOnVersionsWithoutCC(String version, @TempDir Path projectDir) throws IOException {
+        worksOnVersions(version, projectDir, "dependencySizeReport", "-Dorg.gradle.unsafe.isolated-projects=false", "--stacktrace");
+    }
+
+    private void worksOnVersions(String version, @TempDir Path projectDir, String... arguments) throws IOException {
         writeString(getSettingsFile(projectDir), "");
         writeString(getBuildFile(projectDir),
                 """
@@ -250,6 +260,144 @@ class DependencySizeReportPluginFunctionalTest {
         runner.forwardOutput();
         runner.withPluginClasspath();
         runner.withArguments("dependencySizeReport", "--stacktrace");
+        runner.withProjectDir(projectDir.toFile());
+        BuildResult result = runner.build();
+        BuildResult rerunResult = runner.build();
+
+        // Verify the result
+        var task = result.task(":dependencySizeReport");
+        assertNotNull(task);
+        assertEquals(TaskOutcome.SUCCESS, task.getOutcome());
+
+        System.out.println(result.getTasks());
+
+        var rerunTask = rerunResult.task(":dependencySizeReport");
+        assertNotNull(rerunTask);
+        assertEquals(TaskOutcome.SUCCESS, rerunTask.getOutcome());
+    }
+
+    @Test
+    public void recursiveIsolationCompatibleTest(@TempDir Path projectDir) throws IOException {
+        writeString(getSettingsFile(projectDir),
+                """
+                        plugins {
+                          id("dependency-size-report") apply false
+                        }
+                        include("lib")
+                        gradle.lifecycle.beforeProject {
+                          plugins.withId("java") {
+                            plugins.apply("dependency-size-report")
+                          }
+                        }
+                """);
+        writeString(getBuildFile(projectDir),
+                """
+                        plugins {
+                          id("java")
+                          id("dependency-size-report-aggregation")
+                          id("dependency-size-report")
+                        }
+                        repositories {
+                          mavenCentral()
+                        }
+                        dependencies {
+                          implementation("com.google.guava:guava:33.5.0-jre!!")
+                          dependencySizeAggregation(project)
+                        }
+                        dependencies {
+                          subprojects.forEach { subproject ->
+                            dependencySizeAggregation(project(subproject.path, "dependencySize"))
+                          }
+                        }
+                        """);
+        var libDir = projectDir.resolve("lib");
+        Files.createDirectories(libDir);
+        writeString(getBuildFile(libDir),
+                """
+                        plugins {
+                          id("java")
+                        }
+                        repositories {
+                          mavenCentral()
+                        }
+                        dependencies {
+                          implementation("com.google.guava:guava:33.4.8-jre!!")
+                        }
+                        """);
+
+        // Run the build
+        GradleRunner runner = GradleRunner.create();
+        runner.forwardOutput();
+        runner.withPluginClasspath();
+        runner.withArguments("dependencySizeReport", "--stacktrace", "-Dorg.gradle.unsafe.isolated-projects=true");
+        runner.withProjectDir(projectDir.toFile());
+        BuildResult result = runner.build();
+        BuildResult rerunResult = runner.build();
+
+        // Verify the result
+        var task = result.task(":dependencySizeReport");
+        assertNotNull(task);
+        assertEquals(TaskOutcome.SUCCESS, task.getOutcome());
+
+        System.out.println(result.getTasks());
+
+        var rerunTask = rerunResult.task(":dependencySizeReport");
+        assertNotNull(rerunTask);
+        assertEquals(TaskOutcome.SUCCESS, rerunTask.getOutcome());
+    }
+
+    @Test
+    public void recursiveIsolationCompatibleErrorTest(@TempDir Path projectDir) throws IOException {
+        writeString(getSettingsFile(projectDir),
+                """
+                        plugins {
+                          id("dependency-size-report") apply false
+                        }
+                        include("lib")
+                        gradle.lifecycle.beforeProject {
+                          plugins.withId("java") {
+                            plugins.apply("dependency-size-report")
+                          }
+                        }
+                """);
+        writeString(getBuildFile(projectDir),
+                """
+                        plugins {
+                          id("java")
+                          id("dependency-size-report-aggregation")
+                          id("dependency-size-report")
+                        }
+                        repositories {
+                          mavenCentral()
+                        }
+                        dependencies {
+                          implementation("com.google.guava:guava:33.5.0-jre!!")
+                          dependencySizeAggregation(project)
+                        }
+                        dependencies {
+                          subprojects.forEach { subproject ->
+                            dependencySizeAggregation(project(subproject.path, "dependencySize"))
+                          }
+                        }
+                        """);
+        var libDir = projectDir.resolve("lib");
+        Files.createDirectories(libDir);
+        writeString(getBuildFile(libDir),
+                """
+                        plugins {
+                        }
+                        repositories {
+                          mavenCentral()
+                        }
+                        dependencies {
+                        }
+                        """);
+
+        // Run the build
+        GradleRunner runner = GradleRunner.create();
+        runner.forwardOutput();
+        runner.withPluginClasspath();
+        runner.withArguments("dependencySizeReport", "--stacktrace", "-Dorg.gradle.unsafe.isolated-projects=true");
         runner.withProjectDir(projectDir.toFile());
         BuildResult result = runner.build();
         BuildResult rerunResult = runner.build();
