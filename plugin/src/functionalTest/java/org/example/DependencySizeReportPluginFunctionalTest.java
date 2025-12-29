@@ -297,7 +297,7 @@ class DependencySizeReportPluginFunctionalTest {
                             plugins.apply("dependency-size-report")
                           }
                         }
-                """);
+                        """);
         writeString(getBuildFile(projectDir),
                 /* language=GROOVY */
                 """
@@ -370,7 +370,7 @@ class DependencySizeReportPluginFunctionalTest {
                             plugins.apply("dependency-size-report")
                           }
                         }
-                """);
+                        """);
         writeString(getBuildFile(projectDir),
                 /* language=GROOVY */
                 """
