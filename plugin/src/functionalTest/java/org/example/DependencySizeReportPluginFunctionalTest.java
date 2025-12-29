@@ -27,6 +27,7 @@ class DependencySizeReportPluginFunctionalTest {
     void basicApply(@TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir), "");
         writeString(getBuildFile(projectDir),
+                /* language=GROOVY */
                 """
                         plugins {
                           id("java")
@@ -65,6 +66,7 @@ class DependencySizeReportPluginFunctionalTest {
     void canRunTask(@TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir), "");
         writeString(getBuildFile(projectDir),
+                /* language=GROOVY */
                 """
                         plugins {
                           id("java")
@@ -114,6 +116,7 @@ class DependencySizeReportPluginFunctionalTest {
     private void worksOnVersions(String version, @TempDir Path projectDir, String... arguments) throws IOException {
         writeString(getSettingsFile(projectDir), "");
         writeString(getBuildFile(projectDir),
+                /* language=GROOVY */
                 """
                         plugins {
                           id("java")
@@ -157,6 +160,7 @@ class DependencySizeReportPluginFunctionalTest {
                 include("lib")
                 """);
         writeString(getBuildFile(projectDir),
+                /* language=GROOVY */
                 """
                         plugins {
                           id("java")
@@ -175,6 +179,7 @@ class DependencySizeReportPluginFunctionalTest {
         var libDir = projectDir.resolve("lib");
         Files.createDirectories(libDir);
         writeString(getBuildFile(libDir),
+                /* language=GROOVY */
                 """
                         plugins {
                           id("java")
@@ -217,6 +222,7 @@ class DependencySizeReportPluginFunctionalTest {
                 include("lib")
                 """);
         writeString(getBuildFile(projectDir),
+                /* language=GROOVY */
                 """
                         plugins {
                           id("java")
@@ -242,10 +248,10 @@ class DependencySizeReportPluginFunctionalTest {
         var libDir = projectDir.resolve("lib");
         Files.createDirectories(libDir);
         writeString(getBuildFile(libDir),
+                /* language=GROOVY */
                 """
                         plugins {
                           id("java")
-                          //id("dependency-size-report")
                         }
                         repositories {
                           mavenCentral()
@@ -279,6 +285,7 @@ class DependencySizeReportPluginFunctionalTest {
     @Test
     public void recursiveIsolationCompatibleTest(@TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir),
+                /* language=GROOVY */
                 """
                         plugins {
                           id("dependency-size-report") apply false
@@ -291,6 +298,7 @@ class DependencySizeReportPluginFunctionalTest {
                         }
                 """);
         writeString(getBuildFile(projectDir),
+                /* language=GROOVY */
                 """
                         plugins {
                           id("java")
@@ -313,6 +321,7 @@ class DependencySizeReportPluginFunctionalTest {
         var libDir = projectDir.resolve("lib");
         Files.createDirectories(libDir);
         writeString(getBuildFile(libDir),
+                /* language=GROOVY */
                 """
                         plugins {
                           id("java")
@@ -349,6 +358,7 @@ class DependencySizeReportPluginFunctionalTest {
     @Test
     public void recursiveIsolationCompatibleErrorTest(@TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir),
+                /* language=GROOVY */
                 """
                         plugins {
                           id("dependency-size-report") apply false
@@ -361,6 +371,7 @@ class DependencySizeReportPluginFunctionalTest {
                         }
                 """);
         writeString(getBuildFile(projectDir),
+                /* language=GROOVY */
                 """
                         plugins {
                           id("java")
@@ -383,6 +394,7 @@ class DependencySizeReportPluginFunctionalTest {
         var libDir = projectDir.resolve("lib");
         Files.createDirectories(libDir);
         writeString(getBuildFile(libDir),
+                /* language=GROOVY */
                 """
                         plugins {
                         }
