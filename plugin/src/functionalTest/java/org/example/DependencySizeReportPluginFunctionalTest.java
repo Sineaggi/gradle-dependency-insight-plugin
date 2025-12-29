@@ -13,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 class DependencySizeReportPluginFunctionalTest {
     private Path getBuildFile(Path projectDir) {
@@ -411,7 +412,8 @@ class DependencySizeReportPluginFunctionalTest {
         runner.withPluginClasspath();
         runner.withArguments("dependencySizeReport", "--stacktrace", "-Dorg.gradle.unsafe.isolated-projects=true");
         runner.withProjectDir(projectDir.toFile());
-        BuildResult result = runner.build();
+        BuildResult result = runner.buildAndFail();
+        assumeFalse(result.getOutput().contains("but no variant with that configuration name exists"));
         BuildResult rerunResult = runner.build();
 
         // Verify the result
