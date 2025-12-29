@@ -357,6 +357,75 @@ class DependencySizeReportPluginFunctionalTest {
     }
 
     @Test
+    public void recursiveIsolationLifecycleTest(@TempDir Path projectDir) throws IOException {
+        writeString(getSettingsFile(projectDir),
+                /* language=GROOVY */
+                """
+                        plugins {
+                          id("dependency-size-report") apply false
+                          id("dependency-size-report-lifecycle")
+                        }
+                        include("lib")
+                        """);
+        writeString(getBuildFile(projectDir),
+                /* language=GROOVY */
+                """
+                        plugins {
+                          id("java")
+                          id("dependency-size-report-aggregation")
+                          id("dependency-size-report")
+                        }
+                        repositories {
+                          mavenCentral()
+                        }
+                        dependencies {
+                          implementation("com.google.guava:guava:33.5.0-jre!!")
+                          dependencySizeAggregation(project)
+                        }
+                        dependencies {
+                          subprojects.forEach { subproject ->
+                            dependencySizeAggregation(project(subproject.path, "dependencySize"))
+                          }
+                        }
+                        """);
+        var libDir = projectDir.resolve("lib");
+        Files.createDirectories(libDir);
+        writeString(getBuildFile(libDir),
+                /* language=GROOVY */
+                """
+                        plugins {
+                          id("java")
+                        }
+                        repositories {
+                          mavenCentral()
+                        }
+                        dependencies {
+                          implementation("com.google.guava:guava:33.4.8-jre!!")
+                        }
+                        """);
+
+        // Run the build
+        GradleRunner runner = GradleRunner.create();
+        runner.forwardOutput();
+        runner.withPluginClasspath();
+        runner.withArguments("dependencySizeReport", "--stacktrace", "-Dorg.gradle.unsafe.isolated-projects=true");
+        runner.withProjectDir(projectDir.toFile());
+        BuildResult result = runner.build();
+        BuildResult rerunResult = runner.build();
+
+        // Verify the result
+        var task = result.task(":dependencySizeReport");
+        assertNotNull(task);
+        assertEquals(TaskOutcome.SUCCESS, task.getOutcome());
+
+        System.out.println(result.getTasks());
+
+        var rerunTask = rerunResult.task(":dependencySizeReport");
+        assertNotNull(rerunTask);
+        assertEquals(TaskOutcome.SUCCESS, rerunTask.getOutcome());
+    }
+
+    @Test
     public void recursiveIsolationCompatibleErrorTest(@TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir),
                 /* language=GROOVY */

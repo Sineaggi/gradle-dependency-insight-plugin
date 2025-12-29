@@ -37,6 +37,10 @@ gradlePlugin {
         id = "dependency-size-report-aggregation"
         implementationClass = "org.example.DependencySizeReportAggregationPlugin"
     }
+    val dependencySizeReportLifecycle by plugins.registering {
+        id = "dependency-size-report-lifecycle"
+        implementationClass = "org.example.DependencySizeReportLifecyclePlugin"
+    }
 }
 
 java {
