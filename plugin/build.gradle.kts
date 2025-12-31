@@ -49,6 +49,10 @@ java {
     }
 }
 
+tasks.compileJava {
+    options.release = 11
+}
+
 gradlePlugin.testSourceSets.add(sourceSets["functionalTest"])
 
 tasks.named<Task>("check") {
