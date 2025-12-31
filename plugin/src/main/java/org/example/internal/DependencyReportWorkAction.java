@@ -13,6 +13,7 @@ import org.gradle.workers.WorkParameters;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class DependencyReportWorkAction implements WorkAction<DependencyReportWorkAction.WriterActionParameters> {
     public interface WriterActionParameters extends WorkParameters {
@@ -35,7 +36,7 @@ public abstract class DependencyReportWorkAction implements WorkAction<Dependenc
                     .setPath(holder.getPath().get())
                     .setSize(holder.getSize().get())
                     .build();
-        }).toList();
+        }).collect(Collectors.toUnmodifiableList());
 
         Report report = Report.newBuilder()
                 .addAllHolders(holders)

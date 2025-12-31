@@ -15,11 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class DependencyReportAggregationWorkAction implements WorkAction<DependencyReportAggregationWorkAction.WriterActionParameters> {
@@ -40,7 +36,7 @@ public abstract class DependencyReportAggregationWorkAction implements WorkActio
                     } catch (IOException e) {
                         throw new GradleException("failed to read report " + path, e);
                     }
-                }).toList();
+                }).collect(Collectors.toUnmodifiableList());
         //var projectHoders = reports.stream().map(report -> {
         //    ProjectHolder.newBuilder()
         //            .setHolder(holder)
@@ -79,12 +75,55 @@ public abstract class DependencyReportAggregationWorkAction implements WorkActio
         });
     }
 
-    record SimpleDep(
-            String path,
-            long size,
-            String ga
-    ) {
+    static final class SimpleDep {
+        private final String path;
+        private final long size;
+        private final String ga;
 
+        SimpleDep(
+                String path,
+                long size,
+                String ga
+        ) {
+            this.path = path;
+            this.size = size;
+            this.ga = ga;
+        }
+
+        public String path() {
+            return path;
+        }
+
+        public long size() {
+            return size;
+        }
+
+        public String ga() {
+            return ga;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (SimpleDep) obj;
+            return Objects.equals(this.path, that.path) &&
+                   this.size == that.size &&
+                   Objects.equals(this.ga, that.ga);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(path, size, ga);
+        }
+
+        @Override
+        public String toString() {
+            return "SimpleDep[" +
+                   "path=" + path + ", " +
+                   "size=" + size + ", " +
+                   "ga=" + ga + ']';
+        }
     }
 
     public static String humanReadableByteCountBin(long bytes) {
