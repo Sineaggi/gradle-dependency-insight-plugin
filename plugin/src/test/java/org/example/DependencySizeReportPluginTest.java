@@ -6,18 +6,17 @@ package org.example;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.gradle.api.Project;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * A simple unit test for the 'org.example.greeting' plugin.
- */
 class DependencySizeReportPluginTest {
-    @Test void pluginRegistersATask() {
+    @Test
+    void pluginRegistersATask() {
         // Create a test project and apply the plugin
         Project project = ProjectBuilder.builder().build();
-        project.getPlugins().apply("org.example.greeting");
+        project.getPlugins().apply("dependency-size-report");
 
         // Verify the result
-        assertNotNull(project.getTasks().findByName("greeting"));
+        assertNotNull(project.getTasks().findByName("dependencySize"));
     }
 }
