@@ -103,18 +103,8 @@ class DependencySizeReportPluginFunctionalTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"9.3.0-milestone-1", "9.2.1", "8.14.3"})
+    @ValueSource(strings = {"9.3.0-rc-2", "9.2.1", "8.14.3", "8.7", "8.6", "8.5", "8.2"})
     public void worksOnVersionsWithCC(String version, @TempDir Path projectDir) throws IOException {
-        worksOnVersions(version, projectDir, "dependencySizeReport", "-Dorg.gradle.unsafe.isolated-projects=true", "--stacktrace");
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"8.6"})
-    public void worksOnVersionsWithoutCC(String version, @TempDir Path projectDir) throws IOException {
-        worksOnVersions(version, projectDir, "dependencySizeReport", "-Dorg.gradle.unsafe.isolated-projects=false", "--stacktrace");
-    }
-
-    private void worksOnVersions(String version, @TempDir Path projectDir, String... arguments) throws IOException {
         writeString(getSettingsFile(projectDir), "");
         writeString(getBuildFile(projectDir),
                 /* language=GROOVY */
@@ -135,7 +125,7 @@ class DependencySizeReportPluginFunctionalTest {
         GradleRunner runner = GradleRunner.create();
         runner.forwardOutput();
         runner.withPluginClasspath();
-        runner.withArguments("dependencySize");
+        runner.withArguments("dependencySize", "-Dorg.gradle.unsafe.isolated-projects=true", "--configuration-cache", "--stacktrace");
         runner.withProjectDir(projectDir.toFile());
         runner.withGradleVersion(version);
         BuildResult result = runner.build();

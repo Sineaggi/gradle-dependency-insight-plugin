@@ -8,6 +8,7 @@ import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.provider.SetProperty;
@@ -23,19 +24,24 @@ import java.util.stream.Stream;
 
 public class DependencySizeTask extends DefaultTask {
 
-    public sealed interface Reference extends Serializable {
-        public record GAV(String groupId, String artifactId, String version) implements Reference {
+    public interface Reference {
+        interface GAV extends Reference {
+            Property<String> getGroupId();
+            Property<String> getArtifactId();
+            Property<String> getVersion();
         }
 
-        public record StringGav(String gav) implements Reference {
-        }
-
-        public record ProjectPath(String projectName, String projectPath) implements Reference {
+        interface ProjectPath extends Reference {
+            Property<String> getProjectName();
+            Property<String> getProjectPath();
         }
     }
 
-    public record Holder(String configurationName, Reference reference, String path,
-                         long size) implements Serializable {
+    public interface Holder {
+        Property<String> getConfigurationName();
+        Property<Reference> getReference();
+        Property<String> getPath();
+        Property<Long> getSize();
     }
 
     private final SetProperty<@NonNull Holder> holders = getProject().getObjects().setProperty(Holder.class);
@@ -93,6 +99,7 @@ public class DependencySizeTask extends DefaultTask {
                 "runtimeClasspath",
                 "testRuntimeClasspath"
         );
+        ObjectFactory objects = project.getObjects();
         project.getConfigurations().forEach(configuration -> {
             if (!configuration.isCanBeResolved()) {
                 return;
@@ -109,11 +116,24 @@ public class DependencySizeTask extends DefaultTask {
                     return componentIdentifier instanceof ModuleComponentIdentifier;
                 });
             }).getArtifacts().getResolvedArtifacts().map(artifactResults -> artifactResults.stream().flatMap(artifactResult -> {
+                Holder holder = objects.newInstance(Holder.class);
+                holder.getConfigurationName().set(configuration.getName());
+                holder.getPath().set(artifactResult.getFile().getAbsolutePath());
+                holder.getSize().set(artifactResult.getFile().length());
                 if (artifactResult.getVariant().getOwner() instanceof ModuleComponentIdentifier id) {
-                    return Stream.of(new Holder(configuration.getName(), new Reference.GAV(id.getGroup(), id.getModule(), id.getVersion()), artifactResult.getFile().getAbsolutePath(), artifactResult.getFile().length()));
+                    Reference.GAV reference = objects.newInstance(Reference.GAV.class);
+                    reference.getGroupId().set(id.getGroup());
+                    reference.getArtifactId().set(id.getModule());
+                    reference.getVersion().set(id.getVersion());
+                    holder.getReference().set(reference);
+                    return Stream.of(holder);
                 } else if (artifactResult.getVariant().getOwner() instanceof ProjectComponentIdentifier id) {
                     // todo: this should no longer be possible.
-                    return Stream.of(new Holder(configuration.getName(), new Reference.ProjectPath(id.getProjectName(), id.getProjectPath()), artifactResult.getFile().getAbsolutePath(), artifactResult.getFile().length()));
+                    Reference.ProjectPath reference = objects.newInstance(Reference.ProjectPath.class);
+                    reference.getProjectName().set(id.getProjectName());
+                    reference.getProjectPath().set(id.getProjectPath());
+                    holder.getReference().set(reference);
+                    return Stream.of(holder);
                 } else {
                     // todo: use project warnings to let devs know things haven't gone to plan
                     // throw new GradleException("Unknown project id " + j.getVariant().getOwner().getClass());

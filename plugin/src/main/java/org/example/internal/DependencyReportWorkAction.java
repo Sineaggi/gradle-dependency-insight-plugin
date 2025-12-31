@@ -25,15 +25,15 @@ public abstract class DependencyReportWorkAction implements WorkAction<Dependenc
     public void execute() {
         // todo: read all others, create combined report.
         List<Holder> holders = getParameters().getHolders().get().stream().map(holder -> {
-            DependencySizeTask.Reference.GAV gav = (DependencySizeTask.Reference.GAV) holder.reference();
+            DependencySizeTask.Reference.GAV gav = (DependencySizeTask.Reference.GAV) holder.getReference().get();
             return Holder.newBuilder()
                     .setGav(gav.toString())
-                    .setGroup(gav.groupId())
-                    .setArtifact(gav.artifactId())
-                    .setVersion(gav.version())
-                    .setConfigurationName(holder.configurationName())
-                    .setPath(holder.path())
-                    .setSize(holder.size())
+                    .setGroup(gav.getGroupId().get())
+                    .setArtifact(gav.getArtifactId().get())
+                    .setVersion(gav.getVersion().get())
+                    .setConfigurationName(holder.getConfigurationName().get())
+                    .setPath(holder.getPath().get())
+                    .setSize(holder.getSize().get())
                     .build();
         }).toList();
 
