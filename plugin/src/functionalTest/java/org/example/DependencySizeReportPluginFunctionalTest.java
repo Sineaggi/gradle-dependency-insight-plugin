@@ -103,7 +103,7 @@ class DependencySizeReportPluginFunctionalTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"9.3.0-rc-2", "9.2.1", "8.14.3", "8.7", "8.6", "8.5", "8.2"})
+    @ValueSource(strings = {"9.3.0-rc-2", "9.2.1", "8.14.3", "8.7", "8.6", "8.5", "8.2", "8.0"})
     public void worksOnVersionsWithCC(String version, @TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir), "");
         writeString(getBuildFile(projectDir),
