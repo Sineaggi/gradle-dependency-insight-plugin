@@ -36,7 +36,7 @@ public abstract class DependencyReportWorkAction implements WorkAction<Dependenc
                     .setPath(holder.getPath().get())
                     .setSize(holder.getSize().get())
                     .build();
-        }).collect(Collectors.toUnmodifiableList());
+        }).collect(Collectors.toList());
 
         Report report = Report.newBuilder()
                 .addAllHolders(holders)

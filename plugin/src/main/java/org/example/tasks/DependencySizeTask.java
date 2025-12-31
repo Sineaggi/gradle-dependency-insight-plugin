@@ -19,6 +19,7 @@ import org.jspecify.annotations.NonNull;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -94,12 +95,11 @@ public class DependencySizeTask extends DefaultTask {
     private SetProperty<@NonNull Holder> ccCompatibleAction() {
         SetProperty<@NonNull Holder> deps = getProject().getObjects().setProperty(Holder.class);
         Project project = getProject();
-        Set<String> configurations = Set.of(
-                "compileClasspath",
-                "testCompileClasspath",
-                "runtimeClasspath",
-                "testRuntimeClasspath"
-        );
+        Set<String> configurations = new HashSet<>();
+        configurations.add("compileClasspath");
+        configurations.add("testCompileClasspath");
+        configurations.add("runtimeClasspath");
+        configurations.add("testRuntimeClasspath");
         ObjectFactory objects = project.getObjects();
         project.getConfigurations().forEach(configuration -> {
             if (!configuration.isCanBeResolved()) {

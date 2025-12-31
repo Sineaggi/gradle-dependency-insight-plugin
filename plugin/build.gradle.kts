@@ -50,7 +50,7 @@ java {
 }
 
 tasks.compileJava {
-    options.release = 11
+    options.release = 8
 }
 
 gradlePlugin.testSourceSets.add(sourceSets["functionalTest"])

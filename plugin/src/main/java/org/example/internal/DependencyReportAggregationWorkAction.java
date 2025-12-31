@@ -36,7 +36,7 @@ public abstract class DependencyReportAggregationWorkAction implements WorkActio
                     } catch (IOException e) {
                         throw new GradleException("failed to read report " + path, e);
                     }
-                }).collect(Collectors.toUnmodifiableList());
+                }).collect(Collectors.toList());
         //var projectHoders = reports.stream().map(report -> {
         //    ProjectHolder.newBuilder()
         //            .setHolder(holder)
@@ -64,8 +64,8 @@ public abstract class DependencyReportAggregationWorkAction implements WorkActio
 
         // convert groupBy to java streams
         simpleDeps.stream().collect(Collectors.groupingBy(SimpleDep::ga)).entrySet().stream().sorted(Comparator.comparingLong((Map.Entry<String, List<SimpleDep>> entry) -> entry.getValue().stream().mapToLong(SimpleDep::size).sum()).reversed()).forEach((entry) -> {
-            var ga = entry.getKey();
-            var deps = entry.getValue();
+            String ga = entry.getKey();
+            List<SimpleDep> deps = entry.getValue();
             if (deps.size() > 1) {
                 System.out.println("Duplicate dep " + ga + " count " + deps.size() + " total size " + humanReadableByteCountBin(deps.stream().mapToLong(SimpleDep::size).sum()));
                 deps.forEach(dep -> {
@@ -106,7 +106,7 @@ public abstract class DependencyReportAggregationWorkAction implements WorkActio
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (SimpleDep) obj;
+            SimpleDep that = (SimpleDep) obj;
             return Objects.equals(this.path, that.path) &&
                    this.size == that.size &&
                    Objects.equals(this.ga, that.ga);
