@@ -3,6 +3,7 @@ package org.example.tasks;
 import org.example.internal.DependencyReportWorkAction;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier;
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
 import org.gradle.api.file.ConfigurableFileCollection;
@@ -120,14 +121,17 @@ public class DependencySizeTask extends DefaultTask {
                 holder.getConfigurationName().set(configuration.getName());
                 holder.getPath().set(artifactResult.getFile().getAbsolutePath());
                 holder.getSize().set(artifactResult.getFile().length());
-                if (artifactResult.getVariant().getOwner() instanceof ModuleComponentIdentifier id) {
+                ComponentIdentifier owner = artifactResult.getVariant().getOwner();
+                if (owner instanceof ModuleComponentIdentifier) {
+                    ModuleComponentIdentifier id = (ModuleComponentIdentifier) owner;
                     Reference.GAV reference = objects.newInstance(Reference.GAV.class);
                     reference.getGroupId().set(id.getGroup());
                     reference.getArtifactId().set(id.getModule());
                     reference.getVersion().set(id.getVersion());
                     holder.getReference().set(reference);
                     return Stream.of(holder);
-                } else if (artifactResult.getVariant().getOwner() instanceof ProjectComponentIdentifier id) {
+                } else if (owner instanceof ProjectComponentIdentifier) {
+                    ProjectComponentIdentifier id = (ProjectComponentIdentifier) owner;
                     // todo: this should no longer be possible.
                     Reference.ProjectPath reference = objects.newInstance(Reference.ProjectPath.class);
                     reference.getProjectName().set(id.getProjectName());
