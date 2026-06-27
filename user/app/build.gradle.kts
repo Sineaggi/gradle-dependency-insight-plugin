@@ -10,7 +10,7 @@ dependencies {
 
 testing {
     suites {
-        val test by existing(JvmTestSuite::class) {
+        named<JvmTestSuite>("test") {
             useJUnitJupiter("6.0.0")
         }
     }

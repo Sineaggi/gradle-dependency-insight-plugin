@@ -10,11 +10,12 @@ dependencies {
 
 testing {
     suites {
-        val test by existing(JvmTestSuite::class) {
+        val test = named<JvmTestSuite>("test") {
             useJUnitJupiter("6.0.0")
         }
 
-        val functionalTest by registering(JvmTestSuite::class) {
+        val functionalTest = register<JvmTestSuite>("functionalTest") {
+            useJUnitJupiter("6.0.0")
             dependencies {
                 implementation(project())
             }
@@ -29,16 +30,13 @@ testing {
 }
 
 gradlePlugin {
-    val dependencySizeReport by plugins.registering {
-        id = "dependency-size-report"
+    plugins.register("dependency-size-report") {
         implementationClass = "org.example.DependencySizeReportPlugin"
     }
-    val dependencySizeReportAggregation by plugins.registering {
-        id = "dependency-size-report-aggregation"
+    plugins.register("dependency-size-report-aggregation") {
         implementationClass = "org.example.DependencySizeReportAggregationPlugin"
     }
-    val dependencySizeReportLifecycle by plugins.registering {
-        id = "dependency-size-report-lifecycle"
+    plugins.register("dependency-size-report-lifecycle") {
         implementationClass = "org.example.DependencySizeReportLifecyclePlugin"
     }
 }
