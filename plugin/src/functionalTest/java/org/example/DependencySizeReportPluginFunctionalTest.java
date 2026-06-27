@@ -13,8 +13,9 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DependencySizeReportPluginFunctionalTest {
     private Path getBuildFile(Path projectDir) {
@@ -423,7 +424,7 @@ class DependencySizeReportPluginFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, rerunTask.getOutcome());
     }
 
-    @DisplayName("Shows that aggregating a subproject without the dependency-size-report plugin fails with a clear error.")
+    @DisplayName("Shows that a subproject without the dependency-size-report plugin is skipped in aggregation without error.")
     @Test
     public void recursiveIsolationCompatibleErrorTest(@TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir),
@@ -480,8 +481,7 @@ class DependencySizeReportPluginFunctionalTest {
         runner.withPluginClasspath();
         runner.withArguments("dependencySizeReport", "--stacktrace", "-Dorg.gradle.unsafe.isolated-projects=true");
         runner.withProjectDir(projectDir.toFile());
-        BuildResult result = runner.buildAndFail();
-        assumeFalse(result.getOutput().contains("but no variant with that configuration name exists"));
+        BuildResult result = runner.build();
         BuildResult rerunResult = runner.build();
 
         // Verify the result
