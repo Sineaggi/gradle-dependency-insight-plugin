@@ -10,6 +10,7 @@ public class DependencySizeBasePlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
         NamedDomainObjectProvider<Configuration> dependencySizeTooling = project.getConfigurations().register(DEPENDENCY_SIZE_TOOLING, conf -> {
+            conf.setCanBeConsumed(false);
         });
         project.getDependencies().add(dependencySizeTooling.getName(), "com.google.protobuf:protobuf-java:3.25.8");
     }

@@ -19,6 +19,8 @@ public abstract class DependencySizeReportPlugin implements Plugin<Project> {
     public void apply(Project project) {
         project.getPlugins().apply(DependencySizeBasePlugin.class);
         NamedDomainObjectProvider<Configuration> dependencySizeConfiguration = project.getConfigurations().register(DEPENDENCY_SIZE_CONFIGURATION_NAME, (conf) -> {
+            conf.setCanBeConsumed(true);
+            conf.setCanBeResolved(false);
             conf.attributes(attributes -> {
                 attributes.attribute(Category.CATEGORY_ATTRIBUTE, project.getObjects().named(Category.class, DEPENDENCY_SIZE_CATEGORY));
                 attributes.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, "binary");
