@@ -28,7 +28,6 @@ public abstract class DependencySizeReportAggregationPlugin implements Plugin<Pr
     @Override
     public void apply(Project project) {
         project.getPluginManager().apply("org.gradle.reporting-base");
-        project.getPluginManager().apply("jvm-ecosystem");
         project.getPluginManager().apply("dependency-size-report");
 
         project.getPlugins().apply(DependencySizeBasePlugin.class);
