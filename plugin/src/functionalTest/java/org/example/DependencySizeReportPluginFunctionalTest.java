@@ -3,15 +3,18 @@ package org.example;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -106,9 +109,19 @@ class DependencySizeReportPluginFunctionalTest {
         assertTrue(rerunResult.getOutput().contains("Configuration cache entry reused."));
     }
 
+    static Stream<Arguments> namedArguments() {
+        return Stream.of(
+                Arguments.of(Named.of("The latest 9 release", "9.6.0")),
+                Arguments.of(Named.of("The latest 8 release", "8.14.5")),
+                Arguments.of(Named.of("The first 8 release", "8.0")),
+                Arguments.of(Named.of("The latest 7 release", "7.6.6")),
+                Arguments.of(Named.of("The earliest 7 release supported", "7.4"))
+        );
+    }
+
     @DisplayName("Shows the dependencySize task works with configuration cache across a range of supported Gradle versions.")
     @ParameterizedTest
-    @ValueSource(strings = {"9.6.0", "8.14.5", "8.6", "8.0", "7.6.6", "7.4"})
+    @MethodSource("namedArguments")
     public void worksOnVersionsWithCC(String version, @TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir), "");
         writeString(getBuildFile(projectDir),
