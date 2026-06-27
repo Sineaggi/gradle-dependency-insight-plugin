@@ -5,17 +5,17 @@ plugins {
 }
 
 dependencies {
-    compileOnly("com.google.protobuf:protobuf-java:3.25.8")
+    compileOnly(libs.protobuf.java)
 }
 
 testing {
     suites {
         val test = named<JvmTestSuite>("test") {
-            useJUnitJupiter("6.0.0")
+            useJUnitJupiter(libs.versions.junit)
         }
 
         val functionalTest = register<JvmTestSuite>("functionalTest") {
-            useJUnitJupiter("6.0.0")
+            useJUnitJupiter(libs.versions.junit)
             dependencies {
                 implementation(project())
             }
@@ -59,6 +59,6 @@ tasks.named<Task>("check") {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.25.8"
+        artifact = libs.protoc.map { it.toString() }.get()
     }
 }
