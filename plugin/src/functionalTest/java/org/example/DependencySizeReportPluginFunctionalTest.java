@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,6 +25,7 @@ class DependencySizeReportPluginFunctionalTest {
         return projectDir.resolve("settings.gradle");
     }
 
+    @DisplayName("Shows simple application of the plugin works as expected.")
     @Test
     void basicApply(@TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir), "");
@@ -63,6 +65,7 @@ class DependencySizeReportPluginFunctionalTest {
         assertTrue(rerunResult.getOutput().contains("Configuration cache entry reused."));
     }
 
+    @DisplayName("Shows the dependencySize task succeeds and is UP_TO_DATE on rerun with configuration cache.")
     @Test
     void canRunTask(@TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir), "");
@@ -102,6 +105,7 @@ class DependencySizeReportPluginFunctionalTest {
         assertTrue(rerunResult.getOutput().contains("Configuration cache entry reused."));
     }
 
+    @DisplayName("Shows the dependencySize task works with configuration cache across a range of supported Gradle versions.")
     @ParameterizedTest
     @ValueSource(strings = {"9.6.0", "8.14.5", "8.6", "8.0", "7.6.6", "7.4"})
     public void worksOnVersionsWithCC(String version, @TempDir Path projectDir) throws IOException {
@@ -145,6 +149,7 @@ class DependencySizeReportPluginFunctionalTest {
         assertEquals(TaskOutcome.UP_TO_DATE, rerunTask.getOutcome());
     }
 
+    @DisplayName("Shows aggregation works across multiple projects, with dependencies declared explicitly.")
     @Test
     public void multiProjectTest(@TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir), """
@@ -207,6 +212,7 @@ class DependencySizeReportPluginFunctionalTest {
         assertTrue(rerunResult.getOutput().contains("Configuration cache entry reused."));
     }
 
+    @DisplayName("Shows that a non project-isolation-safe build can successfully use this plugin.")
     @Test
     public void recursiveTest(@TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir), """
@@ -273,6 +279,7 @@ class DependencySizeReportPluginFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, rerunTask.getOutcome());
     }
 
+    @DisplayName("Shows aggregation works under isolated projects when plugin application is handled via gradle.lifecycle.beforeProject in settings.")
     @Test
     public void recursiveIsolationCompatibleTest(@TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir),
@@ -346,6 +353,7 @@ class DependencySizeReportPluginFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, rerunTask.getOutcome());
     }
 
+    @DisplayName("Shows aggregation works under isolated projects when the dependency-size-report-lifecycle plugin handles plugin application in settings.")
     @Test
     public void recursiveIsolationLifecycleTest(@TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir),
@@ -415,6 +423,7 @@ class DependencySizeReportPluginFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, rerunTask.getOutcome());
     }
 
+    @DisplayName("Shows that aggregating a subproject without the dependency-size-report plugin fails with a clear error.")
     @Test
     public void recursiveIsolationCompatibleErrorTest(@TempDir Path projectDir) throws IOException {
         writeString(getSettingsFile(projectDir),
