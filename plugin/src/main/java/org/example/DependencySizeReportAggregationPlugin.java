@@ -12,24 +12,18 @@ import org.gradle.api.artifacts.ResolvableConfiguration;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition;
+import org.gradle.api.attributes.Category;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.model.ObjectFactory;
-import org.gradle.api.plugins.JavaBasePlugin;
-import org.gradle.api.plugins.jvm.internal.JvmPluginServices;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.reporting.ReportingExtension;
 import org.gradle.api.specs.Spec;
 import org.jspecify.annotations.NonNull;
 
-import javax.inject.Inject;
-
 @SuppressWarnings("unused")
 public abstract class DependencySizeReportAggregationPlugin implements Plugin<Project> {
 
     public static final String DEPENDENCY_SIZE_AGGREGATION_CONFIGURATION_NAME = "dependencySizeAggregation";
-
-    @Inject
-    protected abstract JvmPluginServices getEcosystemUtilities();
 
     @Override
     public void apply(Project project) {
@@ -48,9 +42,8 @@ public abstract class DependencySizeReportAggregationPlugin implements Plugin<Pr
         NamedDomainObjectProvider<@NonNull ResolvableConfiguration> dependencySizeResultsConf = configurations.resolvable("aggregateDependencySizeReportResults", conf -> {
             conf.setDescription("Resolvable configuration used to gather files for the dependency size report aggregation via ArtifactViews, not intended to be used directly");
             conf.extendsFrom(dependencySizeAggregation.get());
-            project.getPlugins().withType(JavaBasePlugin.class, plugin -> {
-                // If the current project is jvm-based, aggregate dependent projects as jvm-based as well.
-                getEcosystemUtilities().configureAsRuntimeClasspath(conf);
+            conf.attributes(attributes -> {
+                attributes.attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category.class, DependencySizeReportPlugin.DEPENDENCY_SIZE_CATEGORY));
             });
         });
 
@@ -61,9 +54,6 @@ public abstract class DependencySizeReportAggregationPlugin implements Plugin<Pr
                 view.withVariantReselection();
                 view.componentFilter(projectComponent());
                 view.attributes((attributes) -> {
-                    //attributes.attribute(Category.CATEGORY_ATTRIBUTE, (Category)objects.named(Category.class, "verification"));
-                    //attributes.attributeProvider(TestSuiteName.TEST_SUITE_NAME_ATTRIBUTE, report.getTestSuiteName().map((tt) -> (TestSuiteName)objects.named(TestSuiteName.class, tt)));
-                    //attributes.attribute(VerificationType.VERIFICATION_TYPE_ATTRIBUTE, (VerificationType)objects.named(VerificationType.class, "jacoco-coverage"));
                     attributes.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, "binary");
                 });
             }).getFiles());

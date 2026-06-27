@@ -164,7 +164,7 @@ class DependencySizeReportPluginFunctionalTest {
                         dependencies {
                           implementation("com.google.guava:guava:33.5.0-jre!!")
                           dependencySizeAggregation(project)
-                          dependencySizeAggregation(project(":lib", "dependencySize"))
+                          dependencySizeAggregation(project(":lib"))
                         }
                         """);
         var libDir = projectDir.resolve("lib");
@@ -231,7 +231,7 @@ class DependencySizeReportPluginFunctionalTest {
                           subprojects.forEach { subproject ->
                             subproject.plugins.withId("java") {
                               subproject.plugins.apply("dependency-size-report")
-                              dependencySizeAggregation(project(subproject.path, "dependencySize"))
+                              dependencySizeAggregation(project(subproject.path))
                             }
                           }
                         }
@@ -305,7 +305,7 @@ class DependencySizeReportPluginFunctionalTest {
                         }
                         dependencies {
                           subprojects.forEach { subproject ->
-                            dependencySizeAggregation(project(subproject.path, "dependencySize"))
+                            dependencySizeAggregation(project(subproject.path))
                           }
                         }
                         """);
@@ -374,7 +374,7 @@ class DependencySizeReportPluginFunctionalTest {
                         }
                         dependencies {
                           subprojects.forEach { subproject ->
-                            dependencySizeAggregation(project(subproject.path, "dependencySize"))
+                            dependencySizeAggregation(project(subproject.path))
                           }
                         }
                         """);
