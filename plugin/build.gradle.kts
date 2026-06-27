@@ -14,7 +14,7 @@ testing {
             useJUnitJupiter(libs.versions.junit)
         }
 
-        val functionalTest = register<JvmTestSuite>("functionalTest") {
+        register<JvmTestSuite>("functionalTest") {
             useJUnitJupiter(libs.versions.junit)
             dependencies {
                 implementation(project())
@@ -43,7 +43,7 @@ gradlePlugin {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -53,7 +53,7 @@ tasks.compileJava {
 
 gradlePlugin.testSourceSets.add(sourceSets["functionalTest"])
 
-tasks.named<Task>("check") {
+tasks.check {
     dependsOn(testing.suites.named("functionalTest"))
 }
 
