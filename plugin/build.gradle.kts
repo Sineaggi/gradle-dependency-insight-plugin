@@ -1,6 +1,6 @@
 plugins {
     `java-gradle-plugin`
-    id("com.google.protobuf") version "0.9.5"
+    id("com.google.protobuf") version "0.10.0"
     `maven-publish`
 }
 
