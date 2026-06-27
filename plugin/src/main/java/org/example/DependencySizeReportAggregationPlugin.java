@@ -52,6 +52,7 @@ public abstract class DependencySizeReportAggregationPlugin implements Plugin<Pr
         reporting.getReports().withType(DependencySizeReport.class).all((report) -> report.getReportTask().configure((task) -> {
             Provider<@NonNull FileCollection> executionData = dependencySizeResultsConf.map((conf) -> conf.getIncoming().artifactView((view) -> {
                 view.withVariantReselection();
+                view.lenient(true);
                 view.componentFilter(projectComponent());
                 view.attributes((attributes) -> {
                     attributes.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, "binary");
