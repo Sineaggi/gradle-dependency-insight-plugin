@@ -1,4 +1,4 @@
-package org.example;
+package io.github.sineaggi.gradle.dependencysize;
 
 import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Plugin;

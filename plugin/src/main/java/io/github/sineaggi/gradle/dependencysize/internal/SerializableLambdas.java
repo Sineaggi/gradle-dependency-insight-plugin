@@ -1,4 +1,4 @@
-package org.example.internal;
+package io.github.sineaggi.gradle.dependencysize.internal;
 
 import org.gradle.api.specs.Spec;
 

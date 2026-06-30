@@ -1,0 +1,58 @@
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0.5em 0 2em;
+}
+
+th, td {
+    border: 1px solid #d8d8d8;
+    padding: 6px 14px;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+tr:nth-child(even) td {
+    background-color: #fafafa;
+}
+
+td.num {
+    text-align: right;
+    white-space: nowrap;
+    font-family: monospace;
+}
+
+.stat-bar {
+    display: flex;
+    gap: 2em;
+    margin: 0 0 2em;
+    padding: 1em 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.stat-box {
+    padding: 0.4em 1.2em;
+    border-left: 4px solid #909090;
+    background: #f8f8f8;
+}
+
+.stat-value {
+    font-size: 140%;
+    font-weight: bold;
+    line-height: 1.4;
+}
+
+.stat-label {
+    font-size: 80%;
+    color: #808080;
+}
+
+h3 {
+    font-size: 110%;
+    margin: 1.5em 0 0.4em;
+}

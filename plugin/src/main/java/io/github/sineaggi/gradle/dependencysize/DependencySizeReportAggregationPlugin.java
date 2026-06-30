@@ -1,8 +1,8 @@
-package org.example;
+package io.github.sineaggi.gradle.dependencysize;
 
-import org.example.internal.DefaultDependencySizeReport;
-import org.example.internal.SerializableLambdas;
-import org.example.tasks.DependencySizeAggregationTask;
+import io.github.sineaggi.gradle.dependencysize.internal.DefaultDependencySizeReport;
+import io.github.sineaggi.gradle.dependencysize.internal.SerializableLambdas;
+import io.github.sineaggi.gradle.dependencysize.tasks.DependencySizeAggregationTask;
 import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -18,7 +18,6 @@ import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.reporting.ReportingExtension;
 import org.gradle.api.specs.Spec;
-import org.jspecify.annotations.NonNull;
 
 @SuppressWarnings("unused")
 public abstract class DependencySizeReportAggregationPlugin implements Plugin<Project> {
@@ -28,17 +27,17 @@ public abstract class DependencySizeReportAggregationPlugin implements Plugin<Pr
     @Override
     public void apply(Project project) {
         project.getPluginManager().apply("org.gradle.reporting-base");
-        project.getPluginManager().apply("dependency-size-report");
+        project.getPluginManager().apply("io.github.sineaggi.dependency-size-report");
 
         project.getPlugins().apply(DependencySizeBasePlugin.class);
 
         ObjectFactory objects = project.getObjects();
         ConfigurationContainer configurations = project.getConfigurations();
-        NamedDomainObjectProvider<@NonNull DependencyScopeConfiguration> dependencySizeAggregation = configurations.dependencyScope(DEPENDENCY_SIZE_AGGREGATION_CONFIGURATION_NAME, conf -> {
+        NamedDomainObjectProvider<DependencyScopeConfiguration> dependencySizeAggregation = configurations.dependencyScope(DEPENDENCY_SIZE_AGGREGATION_CONFIGURATION_NAME, conf -> {
             conf.setDescription("Collects project dependencies for purposes of dependency size report aggregation");
         });
 
-        NamedDomainObjectProvider<@NonNull ResolvableConfiguration> dependencySizeResultsConf = configurations.resolvable("aggregateDependencySizeReportResults", conf -> {
+        NamedDomainObjectProvider<ResolvableConfiguration> dependencySizeResultsConf = configurations.resolvable("aggregateDependencySizeReportResults", conf -> {
             conf.setDescription("Resolvable configuration used to gather files for the dependency size report aggregation via ArtifactViews, not intended to be used directly");
             conf.extendsFrom(dependencySizeAggregation.get());
             conf.attributes(attributes -> {
@@ -49,7 +48,7 @@ public abstract class DependencySizeReportAggregationPlugin implements Plugin<Pr
         ReportingExtension reporting = project.getExtensions().getByType(ReportingExtension.class);
         reporting.getReports().registerBinding(DependencySizeReport.class, DefaultDependencySizeReport.class);
         reporting.getReports().withType(DependencySizeReport.class).all((report) -> report.getReportTask().configure((task) -> {
-            Provider<@NonNull FileCollection> executionData = dependencySizeResultsConf.map((conf) -> conf.getIncoming().artifactView((view) -> {
+            Provider<FileCollection> executionData = dependencySizeResultsConf.map((conf) -> conf.getIncoming().artifactView((view) -> {
                 view.withVariantReselection();
                 view.lenient(true);
                 view.componentFilter(projectComponent());
@@ -61,6 +60,8 @@ public abstract class DependencySizeReportAggregationPlugin implements Plugin<Pr
             configureReportTaskInputs(task, executionData);
 
             task.getWorkerClasspath().from(project.getConfigurations().named(DependencySizeBasePlugin.DEPENDENCY_SIZE_TOOLING));
+            task.getOutputFile().convention(
+                    reporting.getBaseDirectory().file("dependency-size/" + report.getName() + ".html"));
         }));
         reporting.getReports().register("dependencySizeReport", DependencySizeReport.class, (report) -> {
         });
@@ -70,7 +71,7 @@ public abstract class DependencySizeReportAggregationPlugin implements Plugin<Pr
         return SerializableLambdas.spec((id) -> id instanceof ProjectComponentIdentifier);
     }
 
-    private void configureReportTaskInputs(DependencySizeAggregationTask task, Provider<@NonNull FileCollection> executionData) {
+    private void configureReportTaskInputs(DependencySizeAggregationTask task, Provider<FileCollection> executionData) {
         task.getOthers().from(executionData);
     }
 }

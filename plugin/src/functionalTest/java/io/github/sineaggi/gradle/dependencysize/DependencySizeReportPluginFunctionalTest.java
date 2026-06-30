@@ -1,4 +1,4 @@
-package org.example;
+package io.github.sineaggi.gradle.dependencysize;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,7 +38,7 @@ class DependencySizeReportPluginFunctionalTest {
                 """
                         plugins {
                           id("java")
-                          id("dependency-size-report")
+                          id("io.github.sineaggi.dependency-size-report")
                         }
                         repositories {
                           mavenCentral()
@@ -78,7 +78,7 @@ class DependencySizeReportPluginFunctionalTest {
                 """
                         plugins {
                           id("java")
-                          id("dependency-size-report")
+                          id("io.github.sineaggi.dependency-size-report")
                         }
                         repositories {
                           mavenCentral()
@@ -129,7 +129,7 @@ class DependencySizeReportPluginFunctionalTest {
                 """
                         plugins {
                           id("java")
-                          id("dependency-size-report")
+                          id("io.github.sineaggi.dependency-size-report")
                         }
                         repositories {
                           mavenCentral()
@@ -174,8 +174,8 @@ class DependencySizeReportPluginFunctionalTest {
                 """
                         plugins {
                           id("java")
-                          id("dependency-size-report-aggregation")
-                          id("dependency-size-report")
+                          id("io.github.sineaggi.dependency-size-report-aggregation")
+                          id("io.github.sineaggi.dependency-size-report")
                         }
                         repositories {
                           mavenCentral()
@@ -193,7 +193,7 @@ class DependencySizeReportPluginFunctionalTest {
                 """
                         plugins {
                           id("java")
-                          id("dependency-size-report")
+                          id("io.github.sineaggi.dependency-size-report")
                         }
                         repositories {
                           mavenCentral()
@@ -222,7 +222,7 @@ class DependencySizeReportPluginFunctionalTest {
 
         var rerunTask = rerunResult.task(":dependencySizeReport");
         assertNotNull(rerunTask);
-        assertEquals(TaskOutcome.SUCCESS, rerunTask.getOutcome());
+        assertEquals(TaskOutcome.UP_TO_DATE, rerunTask.getOutcome());
         assertTrue(rerunResult.getOutput().contains("Configuration cache entry reused."));
     }
 
@@ -237,8 +237,8 @@ class DependencySizeReportPluginFunctionalTest {
                 """
                         plugins {
                           id("java")
-                          id("dependency-size-report-aggregation")
-                          id("dependency-size-report")
+                          id("io.github.sineaggi.dependency-size-report-aggregation")
+                          id("io.github.sineaggi.dependency-size-report")
                         }
                         repositories {
                           mavenCentral()
@@ -250,7 +250,7 @@ class DependencySizeReportPluginFunctionalTest {
                         dependencies {
                           subprojects.forEach { subproject ->
                             subproject.plugins.withId("java") {
-                              subproject.plugins.apply("dependency-size-report")
+                              subproject.plugins.apply("io.github.sineaggi.dependency-size-report")
                               dependencySizeAggregation(subproject)
                             }
                           }
@@ -290,7 +290,7 @@ class DependencySizeReportPluginFunctionalTest {
 
         var rerunTask = rerunResult.task(":dependencySizeReport");
         assertNotNull(rerunTask);
-        assertEquals(TaskOutcome.SUCCESS, rerunTask.getOutcome());
+        assertEquals(TaskOutcome.UP_TO_DATE, rerunTask.getOutcome());
     }
 
     @DisplayName("Shows aggregation works under isolated projects when plugin application is handled via gradle.lifecycle.beforeProject in settings.")
@@ -300,12 +300,12 @@ class DependencySizeReportPluginFunctionalTest {
                 /* language=GROOVY */
                 """
                         plugins {
-                          id("dependency-size-report") apply false
+                          id("io.github.sineaggi.dependency-size-report") apply false
                         }
                         include("lib")
                         gradle.lifecycle.beforeProject {
                           plugins.withId("java") {
-                            plugins.apply("dependency-size-report")
+                            plugins.apply("io.github.sineaggi.dependency-size-report")
                           }
                         }
                         """);
@@ -314,8 +314,8 @@ class DependencySizeReportPluginFunctionalTest {
                 """
                         plugins {
                           id("java")
-                          id("dependency-size-report-aggregation")
-                          id("dependency-size-report")
+                          id("io.github.sineaggi.dependency-size-report-aggregation")
+                          id("io.github.sineaggi.dependency-size-report")
                         }
                         repositories {
                           mavenCentral()
@@ -364,7 +364,7 @@ class DependencySizeReportPluginFunctionalTest {
 
         var rerunTask = rerunResult.task(":dependencySizeReport");
         assertNotNull(rerunTask);
-        assertEquals(TaskOutcome.SUCCESS, rerunTask.getOutcome());
+        assertEquals(TaskOutcome.UP_TO_DATE, rerunTask.getOutcome());
     }
 
     @DisplayName("Shows aggregation works under isolated projects when the dependency-size-report-lifecycle plugin handles plugin application in settings.")
@@ -374,8 +374,8 @@ class DependencySizeReportPluginFunctionalTest {
                 /* language=GROOVY */
                 """
                         plugins {
-                          id("dependency-size-report") apply false
-                          id("dependency-size-report-lifecycle")
+                          id("io.github.sineaggi.dependency-size-report") apply false
+                          id("io.github.sineaggi.dependency-size-report-lifecycle")
                         }
                         include("lib")
                         """);
@@ -384,8 +384,8 @@ class DependencySizeReportPluginFunctionalTest {
                 """
                         plugins {
                           id("java")
-                          id("dependency-size-report-aggregation")
-                          id("dependency-size-report")
+                          id("io.github.sineaggi.dependency-size-report-aggregation")
+                          id("io.github.sineaggi.dependency-size-report")
                         }
                         repositories {
                           mavenCentral()
@@ -434,7 +434,7 @@ class DependencySizeReportPluginFunctionalTest {
 
         var rerunTask = rerunResult.task(":dependencySizeReport");
         assertNotNull(rerunTask);
-        assertEquals(TaskOutcome.SUCCESS, rerunTask.getOutcome());
+        assertEquals(TaskOutcome.UP_TO_DATE, rerunTask.getOutcome());
     }
 
     @DisplayName("Shows that a subproject without the dependency-size-report plugin is skipped in aggregation without error.")
@@ -444,12 +444,12 @@ class DependencySizeReportPluginFunctionalTest {
                 /* language=GROOVY */
                 """
                         plugins {
-                          id("dependency-size-report") apply false
+                          id("io.github.sineaggi.dependency-size-report") apply false
                         }
                         include("lib")
                         gradle.lifecycle.beforeProject {
                           plugins.withId("java") {
-                            plugins.apply("dependency-size-report")
+                            plugins.apply("io.github.sineaggi.dependency-size-report")
                           }
                         }
                         """);
@@ -458,8 +458,8 @@ class DependencySizeReportPluginFunctionalTest {
                 """
                         plugins {
                           id("java")
-                          id("dependency-size-report-aggregation")
-                          id("dependency-size-report")
+                          id("io.github.sineaggi.dependency-size-report-aggregation")
+                          id("io.github.sineaggi.dependency-size-report")
                         }
                         repositories {
                           mavenCentral()
@@ -506,7 +506,7 @@ class DependencySizeReportPluginFunctionalTest {
 
         var rerunTask = rerunResult.task(":dependencySizeReport");
         assertNotNull(rerunTask);
-        assertEquals(TaskOutcome.SUCCESS, rerunTask.getOutcome());
+        assertEquals(TaskOutcome.UP_TO_DATE, rerunTask.getOutcome());
     }
 
     private void writeString(Path file, String string) throws IOException {

@@ -1,6 +1,6 @@
-package org.example.tasks;
+package io.github.sineaggi.gradle.dependencysize.tasks;
 
-import org.example.internal.DependencyReportWorkAction;
+import io.github.sineaggi.gradle.dependencysize.internal.DependencyReportWorkAction;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
@@ -15,10 +15,8 @@ import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.*;
 import org.gradle.workers.WorkerExecutor;
-import org.jspecify.annotations.NonNull;
 
 import javax.inject.Inject;
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,13 +44,13 @@ public class DependencySizeTask extends DefaultTask {
         Property<Long> getSize();
     }
 
-    private final SetProperty<@NonNull Holder> holders = getProject().getObjects().setProperty(Holder.class);
+    private final SetProperty<Holder> holders = getProject().getObjects().setProperty(Holder.class);
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
     private final ConfigurableFileCollection workerClasspath = getProject().getObjects().fileCollection();
     private final Property<String> projectId = getProject().getObjects().property(String.class);
 
     @Input
-    public SetProperty<@NonNull Holder> getHolders() {
+    public SetProperty<Holder> getHolders() {
         return holders;
     }
 
@@ -92,8 +90,8 @@ public class DependencySizeTask extends DefaultTask {
         });
     }
 
-    private SetProperty<@NonNull Holder> ccCompatibleAction() {
-        SetProperty<@NonNull Holder> deps = getProject().getObjects().setProperty(Holder.class);
+    private SetProperty<Holder> ccCompatibleAction() {
+        SetProperty<Holder> deps = getProject().getObjects().setProperty(Holder.class);
         Project project = getProject();
         Set<String> configurations = new HashSet<>();
         configurations.add("compileClasspath");

@@ -1,4 +1,4 @@
-package org.example;
+package io.github.sineaggi.gradle.dependencysize;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.initialization.Settings;

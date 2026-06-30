@@ -1,6 +1,6 @@
-package org.example;
+package io.github.sineaggi.gradle.dependencysize;
 
-import org.example.tasks.DependencySizeTask;
+import io.github.sineaggi.gradle.dependencysize.tasks.DependencySizeTask;
 import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Project;
 import org.gradle.api.Plugin;
@@ -8,7 +8,6 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition;
 import org.gradle.api.attributes.Category;
 import org.gradle.api.tasks.TaskProvider;
-import org.jspecify.annotations.NonNull;
 
 @SuppressWarnings("unused")
 public abstract class DependencySizeReportPlugin implements Plugin<Project> {
@@ -27,7 +26,7 @@ public abstract class DependencySizeReportPlugin implements Plugin<Project> {
             });
         });
         NamedDomainObjectProvider<Configuration> dependencySizeTooling = project.getConfigurations().named("dependencySizeTooling");
-        TaskProvider<@NonNull DependencySizeTask> dependencySizeTask = project.getTasks().register("dependencySize", DependencySizeTask.class, task -> {
+        TaskProvider<DependencySizeTask> dependencySizeTask = project.getTasks().register("dependencySize", DependencySizeTask.class, task -> {
             task.getWorkerClasspath().from(dependencySizeTooling);
         });
         project.artifacts(artifactHandler -> {

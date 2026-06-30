@@ -1,8 +1,8 @@
-package org.example.internal;
+package io.github.sineaggi.gradle.dependencysize.internal;
 
-import com.example.protos.Holder;
-import com.example.protos.Report;
-import org.example.tasks.DependencySizeTask;
+import io.github.sineaggi.gradle.dependencysize.protos.Holder;
+import io.github.sineaggi.gradle.dependencysize.protos.Report;
+import io.github.sineaggi.gradle.dependencysize.tasks.DependencySizeTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;

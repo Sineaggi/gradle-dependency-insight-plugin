@@ -1,16 +1,15 @@
-package org.example.internal;
+package io.github.sineaggi.gradle.dependencysize.internal;
 
-import org.example.tasks.DependencySizeAggregationTask;
-import org.example.DependencySizeReport;
+import io.github.sineaggi.gradle.dependencysize.tasks.DependencySizeAggregationTask;
+import io.github.sineaggi.gradle.dependencysize.DependencySizeReport;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
-import org.jspecify.annotations.NonNull;
 
 import javax.inject.Inject;
 
 public class DefaultDependencySizeReport implements DependencySizeReport {
     private final String name;
-    private final TaskProvider<@NonNull DependencySizeAggregationTask> reportTask;
+    private final TaskProvider<DependencySizeAggregationTask> reportTask;
 
     @Inject
     public DefaultDependencySizeReport(String name, TaskContainer tasks) {
@@ -22,12 +21,12 @@ public class DefaultDependencySizeReport implements DependencySizeReport {
     }
 
     @Override
-    public TaskProvider<@NonNull DependencySizeAggregationTask> getReportTask() {
+    public TaskProvider<DependencySizeAggregationTask> getReportTask() {
         return reportTask;
     }
 
     @Override
-    public @NonNull String getName() {
+    public String getName() {
         return name;
     }
 }
