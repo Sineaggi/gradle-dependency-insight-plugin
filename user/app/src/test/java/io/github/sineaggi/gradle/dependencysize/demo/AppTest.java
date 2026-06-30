@@ -1,4 +1,4 @@
-package org.example;
+package io.github.sineaggi.gradle.dependencysize;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

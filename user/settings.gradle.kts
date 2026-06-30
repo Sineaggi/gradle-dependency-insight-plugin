@@ -14,3 +14,7 @@ include("app")
 include("lib")
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
+plugins {
+    id("io.github.sineaggi.dependency-size-report-lifecycle")
+}

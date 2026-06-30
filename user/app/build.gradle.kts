@@ -1,17 +1,18 @@
 plugins {
     application
-    id("dependency-size-report")
+    id("io.github.sineaggi.dependency-size-report")
 }
 
 dependencies {
-    implementation(libs.guava)
+    // implementation(libs.guava)
+    implementation("com.google.guava:guava:33.5.0-jre!!")
     implementation(projects.lib)
 }
 
 testing {
     suites {
         named<JvmTestSuite>("test") {
-            useJUnitJupiter("6.0.0")
+            useJUnitJupiter("6.1.0")
         }
     }
 }
@@ -23,5 +24,5 @@ java {
 }
 
 application {
-    mainClass = "org.example.App"
+    mainClass = "io.github.sineaggi.gradle.dependencysize.demo.App"
 }

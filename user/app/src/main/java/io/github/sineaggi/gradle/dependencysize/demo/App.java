@@ -1,4 +1,4 @@
-package org.example;
+package io.github.sineaggi.gradle.dependencysize;
 
 public class App {
     public String getGreeting() {

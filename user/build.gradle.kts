@@ -1,7 +1,7 @@
 plugins {
     id("java")
-    id("dependency-size-report")
-    id("dependency-size-report-aggregation")
+    //id("io.github.sineaggi.dependency-size-report")
+    id("io.github.sineaggi.dependency-size-report-aggregation")
 }
 
 dependencies {
