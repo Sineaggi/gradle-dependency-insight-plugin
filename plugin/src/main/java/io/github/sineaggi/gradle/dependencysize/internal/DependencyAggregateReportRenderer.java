@@ -34,6 +34,7 @@ class DependencyAggregateReportRenderer extends TabbedPageRenderer<AggregateRepo
         return STYLE_URL;
     }
 
+    // TODO: This uses internal types
     @Override
     protected ReportRenderer<AggregateReportModel, SimpleHtmlWriter> getHeaderRenderer() {
         return new ReportRenderer<AggregateReportModel, SimpleHtmlWriter>() {
@@ -48,6 +49,7 @@ class DependencyAggregateReportRenderer extends TabbedPageRenderer<AggregateRepo
         };
     }
 
+    // TODO: This uses internal types
     @Override
     protected ReportRenderer<AggregateReportModel, SimpleHtmlWriter> getContentRenderer() {
         return tabsRenderer;

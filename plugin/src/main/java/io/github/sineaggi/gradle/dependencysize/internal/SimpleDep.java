@@ -1,5 +1,7 @@
 package io.github.sineaggi.gradle.dependencysize.internal;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Objects;
 
 final class SimpleDep {
@@ -9,10 +11,10 @@ final class SimpleDep {
     private final String version;
 
     SimpleDep(String path, long size, String ga, String version) {
-        this.path = path;
+        this.path = Objects.requireNonNull(path);
         this.size = size;
-        this.ga = ga;
-        this.version = version;
+        this.ga = Objects.requireNonNull(ga);
+        this.version = Objects.requireNonNull(version);
     }
 
     String path() { return path; }
@@ -22,7 +24,7 @@ final class SimpleDep {
     String gav() { return ga + ":" + version; }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         SimpleDep that = (SimpleDep) obj;
