@@ -29,8 +29,6 @@ public abstract class DependencySizeReportAggregationPlugin implements Plugin<Pr
         project.getPluginManager().apply("org.gradle.reporting-base");
         project.getPluginManager().apply("io.github.sineaggi.dependency-size-report");
 
-        project.getPlugins().apply(DependencySizeBasePlugin.class);
-
         ObjectFactory objects = project.getObjects();
         ConfigurationContainer configurations = project.getConfigurations();
         NamedDomainObjectProvider<DependencyScopeConfiguration> dependencySizeAggregation = configurations.dependencyScope(DEPENDENCY_SIZE_AGGREGATION_CONFIGURATION_NAME, conf -> {
@@ -59,7 +57,6 @@ public abstract class DependencySizeReportAggregationPlugin implements Plugin<Pr
 
             configureReportTaskInputs(task, executionData);
 
-            task.getWorkerClasspath().from(project.getConfigurations().named(DependencySizeBasePlugin.DEPENDENCY_SIZE_TOOLING));
             task.getOutputFile().convention(
                     reporting.getBaseDirectory().file("dependency-size/" + report.getName() + ".html"));
         }));

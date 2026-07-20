@@ -1,7 +1,5 @@
 package io.github.sineaggi.gradle.dependencysize.internal;
 
-import io.github.sineaggi.gradle.dependencysize.protos.Holder;
-import io.github.sineaggi.gradle.dependencysize.protos.Report;
 import org.gradle.api.Project;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
@@ -17,6 +15,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -64,7 +63,7 @@ class DependencyReportAggregationWorkActionTest {
     @Test
     void executeDeduplicatesHoldersWithIdenticalPathSizeAndGav() throws IOException {
         // Same jar file referenced from two project reports — should count as one dep.
-        Holder shared = holder("com.example", "shared", "1.0", "/cache/shared.jar", 1024);
+        HolderData shared = holder("com.example", "shared", "1.0", "/cache/shared.jar", 1024);
         File proto1 = writeReport("proj1.bin", report(":app", shared));
         File proto2 = writeReport("proj2.bin", report(":lib", shared));
 
@@ -126,24 +125,20 @@ class DependencyReportAggregationWorkActionTest {
         return Jsoup.parse(outputFile, "UTF-8");
     }
 
-    private File writeReport(String name, Report report) throws IOException {
+    private File writeReport(String name, ReportData report) throws IOException {
         File f = tempDir.resolve(name).toFile();
-        Files.write(f.toPath(), report.toByteArray());
+        try (OutputStream os = Files.newOutputStream(f.toPath())) {
+            ReportIO.write(report, os);
+        }
         return f;
     }
 
-    private static Holder holder(String group, String artifact, String version, String path, long size) {
-        return Holder.newBuilder()
-                .setGroup(group).setArtifact(artifact).setVersion(version)
-                .setPath(path).setSize(size)
-                .build();
+    private static HolderData holder(String group, String artifact, String version, String path, long size) {
+        return new HolderData("", path, size, "", group, artifact, version);
     }
 
-    private static Report report(String projectPath, Holder... holders) {
-        return Report.newBuilder()
-                .setProjectPath(projectPath)
-                .addAllHolders(Arrays.asList(holders))
-                .build();
+    private static ReportData report(String projectPath, HolderData... holders) {
+        return new ReportData(projectPath, Arrays.asList(holders));
     }
 
     private static class TestParameters implements DependencyReportAggregationWorkAction.Parameters {

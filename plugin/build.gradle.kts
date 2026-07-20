@@ -2,14 +2,9 @@ import org.gradle.plugin.compatibility.compatibility
 
 plugins {
     `java-gradle-plugin`
-    id("com.google.protobuf")
     `maven-publish`
     id("com.gradle.plugin-publish")
     id("org.gradle.plugin-compatibility")
-}
-
-dependencies {
-    compileOnly(libs.protobuf.java)
 }
 
 testing {
@@ -18,7 +13,6 @@ testing {
             useJUnitJupiter(libs.versions.junit)
             dependencies {
                 implementation(libs.jsoup)
-                implementation(libs.protobuf.java)
             }
         }
 
@@ -91,10 +85,4 @@ gradlePlugin.testSourceSets.add(sourceSets["functionalTest"])
 
 tasks.check {
     dependsOn(testing.suites.named("functionalTest"))
-}
-
-protobuf {
-    protoc {
-        artifact = libs.protoc.map { it.toString() }.get()
-    }
 }

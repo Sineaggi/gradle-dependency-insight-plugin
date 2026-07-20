@@ -1,9 +1,6 @@
 [versions]
 junit = "6.1.0"
 jsoup = "1.22.2"
-protobuf = "3.25.8"
 
 [libraries]
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
-protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf" }
-protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }

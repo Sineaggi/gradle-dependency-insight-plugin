@@ -6,7 +6,6 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier;
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
-import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.model.ObjectFactory;
@@ -46,7 +45,6 @@ public class DependencySizeTask extends DefaultTask {
 
     private final SetProperty<Holder> holders = getProject().getObjects().setProperty(Holder.class);
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
-    private final ConfigurableFileCollection workerClasspath = getProject().getObjects().fileCollection();
     private final Property<String> projectId = getProject().getObjects().property(String.class);
 
     @Input
@@ -59,11 +57,6 @@ public class DependencySizeTask extends DefaultTask {
         return outputFile;
     }
 
-    @Classpath
-    public ConfigurableFileCollection getWorkerClasspath() {
-        return workerClasspath;
-    }
-
     @Input
     public Property<String> getProjectId() {
         return projectId;
@@ -73,7 +66,9 @@ public class DependencySizeTask extends DefaultTask {
 
     @Inject
     public DependencySizeTask(WorkerExecutor workerExecutor, ProviderFactory providers, ProjectLayout layout) {
-        this.holders.convention(providers.provider(() -> ccCompatibleAction().get()));
+        getProject().getPlugins().withId("java", plugin -> {
+            this.holders.convention(providers.provider(() -> ccCompatibleAction().get()));
+        });
         this.outputFile.convention(layout.getBuildDirectory().file("reports/dependency-size/data.bin"));
         this.workerExecutor = workerExecutor;
         this.projectId.convention(getProject().getPath());
@@ -81,9 +76,7 @@ public class DependencySizeTask extends DefaultTask {
 
     @TaskAction
     public void run() {
-        workerExecutor.classLoaderIsolation(f -> {
-            f.getClasspath().from(getWorkerClasspath());
-        }).submit(DependencyReportWorkAction.class, action -> {
+        workerExecutor.noIsolation().submit(DependencyReportWorkAction.class, action -> {
             action.getOutputFile().convention(getOutputFile());
             action.getHolders().set(getHolders());
             action.getProjectPath().convention(getProjectId());
@@ -94,10 +87,10 @@ public class DependencySizeTask extends DefaultTask {
         SetProperty<Holder> deps = getProject().getObjects().setProperty(Holder.class);
         Project project = getProject();
         Set<String> configurations = new HashSet<>();
-        configurations.add("compileClasspath");
-        configurations.add("testCompileClasspath");
-        configurations.add("runtimeClasspath");
-        configurations.add("testRuntimeClasspath");
+        project.getExtensions().getByType(SourceSetContainer.class).forEach(sourceSet -> {
+            configurations.add(sourceSet.getCompileClasspathConfigurationName());
+            configurations.add(sourceSet.getRuntimeClasspathConfigurationName());
+        });
         ObjectFactory objects = project.getObjects();
         project.getConfigurations().forEach(configuration -> {
             if (!configuration.isCanBeResolved()) {

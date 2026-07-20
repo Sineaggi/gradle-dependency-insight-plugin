@@ -1,8 +1,5 @@
 package io.github.sineaggi.gradle.dependencysize.internal;
 
-import io.github.sineaggi.gradle.dependencysize.protos.AggregateReports;
-import io.github.sineaggi.gradle.dependencysize.protos.Holder;
-import io.github.sineaggi.gradle.dependencysize.protos.Report;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
@@ -31,23 +28,19 @@ public abstract class DependencyReportAggregationWorkAction implements WorkActio
 
     @Override
     public void execute() {
-        List<Report> reports = getParameters().getOthers().getFiles().stream()
+        List<ReportData> reports = getParameters().getOthers().getFiles().stream()
                 .map(File::toPath)
                 .map(path -> {
                     try (InputStream is = Files.newInputStream(path)) {
-                        return Report.parseFrom(is);
+                        return ReportIO.read(is);
                     } catch (IOException e) {
                         throw new GradleException("failed to read report " + path, e);
                     }
                 }).collect(Collectors.toList());
 
-        AggregateReports aggregateReports = AggregateReports.newBuilder()
-                .addAllReports(reports)
-                .build();
-
         Set<SimpleDep> simpleDeps = new HashSet<>();
-        for (Report report : aggregateReports.getReportsList()) {
-            for (Holder holder : report.getHoldersList()) {
+        for (ReportData report : reports) {
+            for (HolderData holder : report.getHoldersList()) {
                 simpleDeps.add(new SimpleDep(
                         holder.getPath(),
                         holder.getSize(),
